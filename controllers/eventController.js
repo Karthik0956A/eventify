@@ -161,36 +161,70 @@ exports.updateEvent = async (req, res) => {
       req.flash('error', 'Access denied. You can only update events you created.');
       return res.redirect('/events');
     }
+    
     const { title, description, location, date, time, category, price, capacity } = req.body;
-    event.title = title;
-    event.description = description;
-    event.location = location;
+    
+    // Validate required fields
+    if (!title || !description || !location || !date || !time || !category || !capacity) {
+      req.flash('error', 'All required fields must be filled.');
+      return res.redirect(`/events/${event._id}/edit`);
+    }
+    
+    // Validate capacity is a positive number
+    if (isNaN(capacity) || capacity <= 0) {
+      req.flash('error', 'Capacity must be a positive number.');
+      return res.redirect(`/events/${event._id}/edit`);
+    }
+    
+    // Validate price if provided
+    if (price && (isNaN(price) || price < 0)) {
+      req.flash('error', 'Price must be a non-negative number.');
+      return res.redirect(`/events/${event._id}/edit`);
+    }
+    
+    event.title = title.trim();
+    event.description = description.trim();
+    event.location = location.trim();
     event.date = date;
     event.time = time;
-    event.category = category;
-    event.price = price || 0;
+    event.category = category.trim();
+    event.price = price ? parseFloat(price) : 0;
+    
     // If capacity changes, update remainingSeats accordingly
-    if (capacity && capacity != event.capacity) {
-      const diff = capacity - event.capacity;
-      event.capacity = capacity;
+    const newCapacity = parseInt(capacity);
+    if (newCapacity !== event.capacity) {
+      const diff = newCapacity - event.capacity;
+      event.capacity = newCapacity;
       event.remainingSeats += diff;
       if (event.remainingSeats < 0) event.remainingSeats = 0;
     }
+    
     if (req.file) {
       event.bannerUrl = '/images/' + req.file.filename;
     }
+    
     // Reset approval status when event is modified
     if (event.status === 'approved') {
       event.status = 'pending';
       event.approvedBy = undefined;
       event.approvedAt = undefined;
     }
+    
     await event.save();
     req.flash('success', 'Event updated! It will be reviewed again by an admin.');
     res.redirect('/events/' + event._id);
   } catch (err) {
-    req.flash('error', 'Could not update event.');
-    res.redirect('/events');
+    console.error('Event update error:', err);
+    
+    // Handle specific validation errors
+    if (err.name === 'ValidationError') {
+      const errorMessages = Object.values(err.errors).map(error => error.message).join(', ');
+      req.flash('error', `Validation error: ${errorMessages}`);
+    } else {
+      req.flash('error', 'Could not update event. Please try again.');
+    }
+    
+    res.redirect(`/events/${req.params.id}/edit`);
   }
 };
 

@@ -1,7 +1,7 @@
 <div class="container" style="max-width:600px;margin:2rem auto;">
   <div class="card">
     <h2 style="text-align:center;margin-bottom:1.5rem;">Edit Event</h2>
-    <form action="/events/<%= event ? event._id : '' %>" method="POST" enctype="multipart/form-data">
+    <form action="/events/<%= event ? event._id : '' %>?_method=PUT" method="POST" enctype="multipart/form-data">
       <input type="text" name="title" placeholder="Event Title" value="<%= event ? event.title : '' %>" required>
       <textarea name="description" placeholder="Description" rows="4" required><%= event ? event.description : '' %></textarea>
       <input type="text" name="location" placeholder="Location" value="<%= event ? event.location : '' %>" required>

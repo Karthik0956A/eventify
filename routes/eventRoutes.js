@@ -51,6 +51,12 @@ router.post('/', isAuthenticated, (req, res, next) => {
   });
 }, eventController.createEvent);
 
+// Admin routes - these must come before /:id routes
+router.get('/admin/pending', hasRole('admin'), eventController.getPendingEvents);
+router.post('/admin/approve/:id', hasRole('admin'), eventController.approveEvent);
+router.post('/admin/reject/:id', hasRole('admin'), eventController.rejectEvent);
+router.post('/admin/approve-all', hasRole('admin'), eventController.approveAllEvents);
+
 // Public routes that need to come after /new
 router.get('/:id', eventController.showEvent);
 
@@ -65,11 +71,5 @@ router.post('/:id/rsvp', eventController.rsvpEvent);
 
 // Event details with registrations (for event creators)
 router.get('/:id/details', eventController.showEventDetails);
-
-// Admin routes
-router.get('/admin/pending', hasRole('admin'), eventController.getPendingEvents);
-router.post('/admin/:id/approve', hasRole('admin'), eventController.approveEvent);
-router.post('/admin/:id/reject', hasRole('admin'), eventController.rejectEvent);
-router.post('/admin/approve-all', hasRole('admin'), eventController.approveAllEvents);
 
 module.exports = router;

@@ -1,0 +1,124 @@
+<div class="container" style="max-width:600px;margin:2rem auto;">
+  <div class="card">
+    <h2 style="margin-bottom:1.5rem;">👤 User Profile</h2>
+    
+    <!-- User Information -->
+    <div style="margin-bottom:2rem;">
+      <h3 style="margin-bottom:1rem;color:var(--primary);">Personal Information</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+        <div>
+          <label style="font-weight:600;color:var(--muted);font-size:0.875rem;">Name</label>
+          <p style="margin:0.25rem 0 0 0;"><%= userData.name %></p>
+        </div>
+        <div>
+          <label style="font-weight:600;color:var(--muted);font-size:0.875rem;">Email</label>
+          <p style="margin:0.25rem 0 0 0;"><%= userData.email %></p>
+        </div>
+        <div>
+          <label style="font-weight:600;color:var(--muted);font-size:0.875rem;">Phone</label>
+          <p style="margin:0.25rem 0 0 0;"><%= userData.phone || 'Not provided' %></p>
+        </div>
+        <div>
+          <label style="font-weight:600;color:var(--muted);font-size:0.875rem;">Age</label>
+          <p style="margin:0.25rem 0 0 0;"><%= userData.age || 'Not provided' %></p>
+        </div>
+        <div>
+          <label style="font-weight:600;color:var(--muted);font-size:0.875rem;">Gender</label>
+          <p style="margin:0.25rem 0 0 0;"><%= userData.gender || 'Not provided' %></p>
+        </div>
+        <div>
+          <label style="font-weight:600;color:var(--muted);font-size:0.875rem;">Role</label>
+          <p style="margin:0.25rem 0 0 0;">
+            <% if (userData.role === 'admin') { %>
+              <span style="color:var(--accent);font-weight:600;">Admin</span>
+            <% } else if (userData.role === 'organizer') { %>
+              <span style="color:var(--primary);font-weight:600;">Organizer</span>
+            <% } else { %>
+              <span style="color:var(--muted);">User</span>
+            <% } %>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wallet Balance -->
+    <div style="margin-bottom:2rem;">
+      <h3 style="margin-bottom:1rem;color:var(--primary);">💰 Wallet Balance</h3>
+      <div style="background:var(--bg);padding:1rem;border-radius:var(--radius);border:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:1rem;">
+          <span style="font-size:2rem;">💳</span>
+          <div>
+            <p style="margin:0;font-size:0.875rem;color:var(--muted);">Current Balance</p>
+            <p style="margin:0;font-size:1.5rem;font-weight:600;color:var(--primary);">$<%= userData.walletBalance.toFixed(2) %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Password -->
+    <div style="margin-bottom:2rem;">
+      <h3 style="margin-bottom:1rem;color:var(--primary);">🔐 Change Password</h3>
+      <form action="/auth/update-password" method="POST" style="background:var(--bg);padding:1.5rem;border-radius:var(--radius);border:1px solid var(--border);">
+        <div style="margin-bottom:1rem;">
+          <label for="currentPassword" style="display:block;font-weight:600;margin-bottom:0.5rem;">Current Password</label>
+          <input type="password" id="currentPassword" name="currentPassword" required style="width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius);">
+        </div>
+        <div style="margin-bottom:1rem;">
+          <label for="newPassword" style="display:block;font-weight:600;margin-bottom:0.5rem;">New Password</label>
+          <input type="password" id="newPassword" name="newPassword" required style="width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius);">
+        </div>
+        <div style="margin-bottom:1.5rem;">
+          <label for="confirmPassword" style="display:block;font-weight:600;margin-bottom:0.5rem;">Confirm New Password</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" required style="width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius);">
+        </div>
+        <button type="submit" class="btn btn-accent" style="width:100%;">Update Password</button>
+      </form>
+    </div>
+
+    <!-- Account Statistics -->
+    <div style="margin-bottom:2rem;">
+      <h3 style="margin-bottom:1rem;color:var(--primary);">📊 Account Statistics</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div style="background:var(--bg);padding:1rem;border-radius:var(--radius);border:1px solid var(--border);text-align:center;">
+          <div style="font-size:2rem;margin-bottom:0.5rem;">📅</div>
+          <div style="font-weight:600;color:var(--primary);">Member Since</div>
+          <div style="color:var(--muted);font-size:0.875rem;"><%= new Date(userData.createdAt).toLocaleDateString() %></div>
+        </div>
+        <div style="background:var(--bg);padding:1rem;border-radius:var(--radius);border:1px solid var(--border);text-align:center;">
+          <div style="font-size:2rem;margin-bottom:0.5rem;">🎫</div>
+          <div style="font-weight:600;color:var(--primary);">Events Attended</div>
+          <div style="color:var(--muted);font-size:0.875rem;">Coming Soon</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+      <a href="/dashboard" class="btn" style="background:var(--muted);">← Back to Dashboard</a>
+      <a href="/events" class="btn btn-accent">Browse Events</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// Password confirmation validation
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('form[action="/auth/update-password"]');
+  const newPassword = document.getElementById('newPassword');
+  const confirmPassword = document.getElementById('confirmPassword');
+
+  form.addEventListener('submit', function(e) {
+    if (newPassword.value !== confirmPassword.value) {
+      e.preventDefault();
+      alert('New passwords do not match!');
+      return false;
+    }
+
+    if (newPassword.value.length < 6) {
+      e.preventDefault();
+      alert('Password must be at least 6 characters long!');
+      return false;
+    }
+  });
+});
+</script>

@@ -6,17 +6,46 @@
   <title>Login - Eventify</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" href="/images/favicon.ico">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body>
-  <div class="container" style="max-width:400px;margin:3rem auto;">
-    <div class="card">
-      <h2 style="text-align:center;margin-bottom:1.5rem;">Login to Eventify</h2>
+<body style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;">
+  <div class="container" style="max-width:400px;margin:2rem;">
+    <div class="card" style="text-align:center;padding:2rem;">
+      <div style="margin-bottom:2rem;">
+        <h1 style="margin:0;color:var(--primary);font-size:2rem;">🎉</h1>
+        <h2 style="margin:0.5rem 0;color:var(--primary);">Welcome Back!</h2>
+        <p style="color:var(--muted);margin:0;">Login to your Eventify account</p>
+      </div>
+      
       <form action="/auth/login" method="POST">
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button class="btn" type="submit" style="width:100%;margin-top:1rem;">Login</button>
+        <div style="margin-bottom:1rem;">
+          <label for="email" style="display:block;text-align:left;font-weight:600;margin-bottom:0.5rem;">Email Address</label>
+          <input type="email" id="email" name="email" required 
+                 style="width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius);box-sizing:border-box;"
+                 placeholder="Enter your email">
+        </div>
+        
+        <div style="margin-bottom:1rem;">
+          <label for="password" style="display:block;text-align:left;font-weight:600;margin-bottom:0.5rem;">Password</label>
+          <input type="password" id="password" name="password" required 
+                 style="width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius);box-sizing:border-box;"
+                 placeholder="Enter your password">
+        </div>
+        
+        <button class="btn btn-accent" type="submit" style="width:100%;margin-bottom:1rem;">
+          Login to Eventify
+        </button>
       </form>
-      <p style="text-align:center;margin-top:1rem;">Don't have an account? <a href="/auth/register" style="color:var(--primary);">Register</a></p>
+      
+      <div style="border-top:1px solid var(--border);padding-top:1rem;">
+        <p style="margin:0 0 0.5rem 0;color:var(--muted);font-size:0.875rem;">
+          <a href="/auth/forgot-password" style="color:var(--primary);text-decoration:none;font-weight:600;">Forgot Password?</a>
+        </p>
+        <p style="margin:0;color:var(--muted);font-size:0.875rem;">
+          Don't have an account? 
+          <a href="/auth/register" style="color:var(--primary);text-decoration:none;font-weight:600;">Register here</a>
+        </p>
+      </div>
     </div>
   </div>
 </body>

@@ -2,6 +2,9 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Event = require('../models/Event');
 const RSVP = require('../models/RSVP');
 const Payment = require('../models/Payment');
+const User = require('../models/User');
+const { sendPaymentConfirmationEmail } = require('../utils/email');
+const { createNotification } = require('../controllers/notificationController');
 
 exports.createCheckoutSession = async (req, res) => {
   try {
@@ -113,6 +116,63 @@ exports.paymentSuccess = async (req, res) => {
       rsvp.paymentStatus = 'paid';
       await rsvp.save();
       console.log(`RSVP ${rsvp._id} marked as paid`);
+    }
+
+    // Get event and user details
+    const event = await Event.findById(eventId);
+    const user = await User.findById(req.session.user._id);
+    const organizer = await User.findById(event.createdBy);
+
+    // Update wallet balances
+    const organizerAmount = event.price * 0.9; // 90% to organizer
+    const adminAmount = event.price * 0.1; // 10% to admin
+
+    // Update organizer's wallet
+    organizer.walletBalance += organizerAmount;
+    await organizer.save();
+
+    // Find admin user and update their wallet
+    const adminUser = await User.findOne({ role: 'admin' });
+    if (adminUser) {
+      adminUser.walletBalance += adminAmount;
+      await adminUser.save();
+    }
+
+    // Send payment confirmation email
+    try {
+      await sendPaymentConfirmationEmail(
+        user.email, 
+        user.name, 
+        event.title, 
+        event.price, 
+        event.date
+      );
+    } catch (emailErr) {
+      console.error('Payment confirmation email failed:', emailErr);
+    }
+
+    // Create notifications
+    try {
+      // Notification for user
+      await createNotification(
+        user._id,
+        'Registration Successful',
+        `Registration successful for ${event.title}`,
+        'registration',
+        event._id
+      );
+
+      // Notification for organizer
+      await createNotification(
+        organizer._id,
+        'New Registration',
+        `${user.name} registered for ${event.title}`,
+        'registration',
+        event._id,
+        user._id
+      );
+    } catch (notificationErr) {
+      console.error('Notification creation failed:', notificationErr);
     }
 
     req.flash('success', 'Payment successful! You are registered for the event.');

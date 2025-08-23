@@ -66,6 +66,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const extraRoutes = require('./routes/extraRoutes');
 const qrRoutes = require('./routes/qrRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 const { startReminders } = require('./jobs/reminderJob');
 
 // Socket.io chat logic
@@ -88,6 +89,7 @@ connectDB().then(() => {
   app.use('/dashboard', dashboardRoutes);
   app.use('/extra', extraRoutes);
   app.use('/qr', qrRoutes);
+  app.use('/notifications', notificationRoutes);
 
   // 404 handler
   app.use((req, res) => {

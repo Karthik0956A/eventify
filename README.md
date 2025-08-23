@@ -1,272 +1,246 @@
-# Eventify - Community Event Management Platform
+# Eventify - Event Management Platform
 
-A full-featured, production-ready platform for managing, discovering, and registering for community events.
+A comprehensive event management platform built with Node.js, Express, MongoDB, and Socket.io. Features include user registration, event creation, payment processing, real-time chat, notifications, and wallet management.
 
-## ✨ Features
+## 🚀 Features
 
-### 🔐 Authentication & Authorization
-- User registration, login, logout with session management
-- Role-based access control (User, Organizer, Admin)
-- Password hashing with bcrypt
-- Admin can promote users to different roles
-- **NEW:** Welcome email sent automatically on registration
+### User Management
+- **Enhanced Signup Flow**: Phone number, age, gender collection
+- **Profile Management**: View and update user information
+- **Password Management**: Change password with current password verification
+- **Forgot Password**: OTP-based password reset via email
 
-### 📅 Event Management
-- Create, edit, delete events (All authenticated users)
-- **NEW:** Admin approval system for events before they go live
-- **NEW:** Bulk approve all pending events
-- Event details: title, description, location, date, time, category, price, capacity
-- Banner image upload with Multer
-- Real-time seat availability tracking
-- Event discovery with search and filtering
-- **NEW:** Event status tracking (pending, approved, rejected)
+### Event Management
+- **Event Creation**: Create events with approval workflow
+- **Event Discovery**: Browse events with dynamic search and filtering
+- **Event Details**: View comprehensive event information with organizer contact
+- **Real-time Chat**: Socket.io powered chat for event participants
 
-### 🎫 RSVP & Payments
-- RSVP for events (prevents double registration)
-- **NEW:** Only approved events can be RSVP'd
-- Stripe payment integration for paid events
-- Payment status tracking
-- QR code generation for each RSVP
+### Payment & Wallet System
+- **Stripe Integration**: Secure payment processing
+- **Wallet Management**: Automatic wallet balance updates
+- **Revenue Sharing**: 90% to organizer, 10% to admin
+- **Payment Confirmation**: Email notifications for successful payments
 
-### 💬 Community Features
-- Real-time event chat using Socket.io
-- **NEW:** Enhanced event reminders via email (daily + hourly)
-- QR code validation for event check-in
+### Notifications
+- **Real-time Notifications**: Bell icon with unread count
+- **Email Notifications**: Welcome, payment confirmation, and OTP emails
+- **Event Notifications**: Registration confirmations and updates
 
-### 📊 Dashboard & Analytics
-- User dashboard: view registered events, QR codes
-- Organizer dashboard: manage created events, see pending count
-- **NEW:** Admin dashboard: manage all users/events, review pending events, bulk actions
-- Chart.js integration for visual analytics
-- **NEW:** Pending events overview and quick actions
+### Email System
+- **Google SMTP**: Configured with Gmail
+- **Email Templates**: Beautiful HTML templates for all email types
+- **Welcome Emails**: Sent on successful registration
+- **Payment Confirmations**: Detailed payment receipts
 
-### 🎨 Modern UI/UX
-- Clean, responsive design with custom CSS
-- SweetAlert2 for beautiful toast notifications
-- Mobile-friendly responsive layout
-- Professional color scheme and typography
-- **NEW:** Event status indicators and admin controls
+## 🛠️ Installation
 
-## 🛠️ Tech Stack
-
-- **Backend:** Node.js, Express.js
-- **Database:** MongoDB with Mongoose
-- **Templating:** EJS
-- **Styling:** Custom CSS (no frameworks)
-- **Authentication:** Express-session, bcrypt
-- **File Upload:** Multer
-- **Payments:** Stripe API
-- **Real-time:** Socket.io
-- **Email:** Nodemailer
-- **Scheduling:** node-cron
-- **QR Codes:** qrcode
-- **Charts:** Chart.js
-- **Notifications:** SweetAlert2
-
-## 🚀 Quick Start
-
-### 1. Prerequisites
+### Prerequisites
 - Node.js (v14 or higher)
-- MongoDB (local or cloud)
-- Stripe account (for payments)
+- MongoDB
+- Gmail account with app password
+- Stripe account
 
-### 2. Installation
-```bash
-# Clone the repository
-git clone <your-repo-url>
-cd Event-Mangment
+### Setup Instructions
 
-# Install dependencies
-npm install
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd eventify
+   ```
 
-# Create environment file
-cp .env.example .env
-```
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-### 3. Environment Configuration
-Edit `.env` file with your credentials:
-```env
-# MongoDB connection
-MONGO_URI=mongodb://localhost:27017/event-mgmt
+3. **Environment Configuration**
+   Create a `.env` file in the root directory:
+   ```env
+   # Database
+   MONGO_URI=mongodb://localhost:27017/eventify
+   
+   # Session
+   SESSION_SECRET=your-session-secret-here
+   
+   # Email (Google SMTP)
+   SMTP_USER=your-gmail@gmail.com
+   SMTP_PASS=your-gmail-app-password
+   
+   # Stripe
+   STRIPE_SECRET_KEY=your-stripe-secret-key
+   STRIPE_PUBLISHABLE_KEY=your-stripe-publishable-key
+   
+   # App
+   PORT=3000
+   BASE_URL=http://localhost:3000
+   ```
 
-# Session secret (any random string)
-SESSION_SECRET=your_super_secret_session_key_here
+4. **Gmail Setup**
+   - Enable 2-factor authentication on your Gmail account
+   - Generate an app password:
+     1. Go to Google Account settings
+     2. Security → 2-Step Verification → App passwords
+     3. Generate a new app password for "Mail"
+     4. Use this password in `SMTP_PASS`
 
-# Stripe API keys (test mode)
-STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
-STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
+5. **Database Setup**
+   ```bash
+   npm run setup
+   ```
 
-# SMTP for email (Gmail example)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your_email@gmail.com
-SMTP_PASS=your_gmail_app_password
-SMTP_FROM=your_email@gmail.com
-```
+6. **Test Email Configuration**
+   ```bash
+   npm run test-email
+   ```
 
-### 4. Database Setup
-```bash
-# Create initial admin user
-npm run setup
+7. **Start the application**
+   ```bash
+   npm start
+   # or for development
+   npm run dev
+   ```
 
-# This creates:
-# Email: admin@eventify.com
-# Password: admin123
-# Role: admin
-```
+## 📧 Email Configuration
 
-### 5. Test Email Configuration
-```bash
-# Test if your email setup is working
-npm run test-email
+The application uses Google SMTP for sending emails. You only need to configure:
+- `SMTP_USER`: Your Gmail address
+- `SMTP_PASS`: Your Gmail app password
 
-# This will verify your SMTP configuration and send a test email
-```
+### Email Types
+- **Welcome Email**: Sent on user registration
+- **Payment Confirmation**: Sent after successful event registration
+- **OTP Email**: Sent for password reset
+- **Event Reminders**: Sent before events
 
-### 6. Run the Application
-```bash
-# Development mode
-npm run dev
+## 💳 Payment System
 
-# Production mode
-npm start
-```
+The platform uses Stripe for payment processing with automatic wallet management:
 
-### 6. Access the Application
-- **URL:** http://localhost:3000
-- **Admin Login:** admin@eventify.com / admin123
+- **Event Registration**: Users pay for event registration
+- **Revenue Split**: 90% goes to event organizer, 10% to admin
+- **Wallet Balances**: Automatically updated in user profiles
+- **Payment Confirmation**: Email receipts sent to users
 
-## 📁 Project Structure
+## 🔔 Notifications
 
-```
-Event-Mangment/
-├── config/          # Database configuration
-├── controllers/     # Route logic and business logic
-├── middleware/      # Authentication and authorization
-├── models/          # Mongoose data models
-├── routes/          # Express route definitions
-├── views/           # EJS templates
-│   ├── auth/        # Login/register pages
-│   ├── dashboard/   # User/organizer/admin dashboards
-│   ├── events/      # Event management pages
-│   ├── layouts/     # Main layout template
-│   └── partials/    # Reusable components
-├── public/          # Static assets
-│   ├── css/         # Custom stylesheets
-│   ├── js/          # Client-side JavaScript
-│   └── images/      # Uploaded images
-├── utils/           # Utility functions
-├── jobs/            # Scheduled tasks (reminders)
-├── scripts/         # Setup and utility scripts
-└── server.js        # Main application file
-```
+### Real-time Notifications
+- Bell icon in navbar shows unread count
+- Click to view notification dropdown
+- Mark individual or all notifications as read
+- Notifications for:
+  - Event registrations
+  - Payment confirmations
+  - System updates
 
-## 🔧 Configuration
+### Email Notifications
+- Welcome emails on registration
+- Payment confirmation emails
+- OTP emails for password reset
+- Event reminder emails
 
-### MongoDB
-- Local: `mongodb://localhost:27017/event-mgmt`
-- Cloud: Use MongoDB Atlas connection string
+## 🎯 Usage
 
-### Stripe (Test Mode)
-1. Create account at [stripe.com](https://stripe.com)
-2. Get test API keys from dashboard
-3. Use test card: 4242 4242 4242 4242
+### For Users
+1. **Register**: Create account with enhanced profile information
+2. **Browse Events**: Use dynamic search and filters
+3. **Register for Events**: Pay and get confirmation emails
+4. **Chat**: Participate in event-specific chat rooms
+5. **Manage Profile**: Update password and view wallet balance
 
-### Gmail SMTP
-1. Enable 2-Step Verification
-2. Generate App Password
-3. Use App Password (not regular password)
+### For Organizers
+1. **Create Events**: Submit events for admin approval
+2. **Manage Events**: Edit and update event details
+3. **Receive Payments**: Automatic wallet balance updates
+4. **Monitor Registrations**: Real-time notification of new registrations
 
-## 🎯 User Roles & Workflow
+### For Admins
+1. **Approve Events**: Review and approve pending events
+2. **Manage Users**: Promote users to organizer/admin roles
+3. **Monitor Platform**: View all events and user activities
+4. **Revenue Management**: Receive 10% of all event payments
 
-### 👤 User
-- Browse and search **approved** events only
-- RSVP for **approved** events
-- View registered events
-- Access event chat
-- Receive email reminders
-- **NEW:** Create events (subject to admin approval)
+## 🔧 API Endpoints
 
-### 🎪 Organizer
-- All User permissions
-- Create and manage events
-- Upload event banners
-- View event analytics
-- **NEW:** See pending event count in dashboard
-- **NEW:** Events require admin approval before going live
+### Authentication
+- `POST /auth/register` - User registration
+- `POST /auth/login` - User login
+- `GET /auth/logout` - User logout
+- `GET /auth/forgot-password` - Forgot password page
+- `POST /auth/forgot-password` - Send OTP
+- `GET /auth/reset-password` - Reset password page
+- `POST /auth/reset-password` - Reset password with OTP
+- `GET /auth/profile` - User profile
+- `POST /auth/update-password` - Update password
 
-### 👑 Admin
-- All Organizer permissions
-- Manage all users
-- Promote users to different roles
-- Access system-wide analytics
-- Manage all events
-- **NEW:** Review and approve/reject pending events
-- **NEW:** Bulk approve all pending events
-- **NEW:** See event status and approval workflow
+### Events
+- `GET /events` - List all events
+- `GET /events/:id` - Get event details
+- `POST /events` - Create new event
+- `PUT /events/:id` - Update event
+- `DELETE /events/:id` - Delete event
+
+### Payments
+- `POST /payments/create-checkout-session` - Create Stripe session
+- `GET /payments/success` - Payment success callback
+- `GET /payments/cancel` - Payment cancel callback
+
+### Notifications
+- `GET /notifications` - Get user notifications
+- `GET /notifications/unread-count` - Get unread count
+- `PUT /notifications/:id/read` - Mark as read
+- `PUT /notifications/mark-all-read` - Mark all as read
+- `DELETE /notifications/:id` - Delete notification
+
+## 🎨 UI Features
+
+### Responsive Design
+- Mobile-friendly interface
+- Clean, modern design
+- Toast notifications
+- Dynamic search and filtering
+
+### Real-time Features
+- Live chat using Socket.io
+- Real-time notifications
+- Dynamic event filtering
 
 ## 🚀 Deployment
 
-### Heroku
-```bash
-# Add MongoDB addon
-heroku addons:create mongolab
+### Environment Variables
+Ensure all required environment variables are set in production:
+- Database connection string
+- Email credentials
+- Stripe keys
+- Session secret
+- Base URL
 
-# Set environment variables
-heroku config:set NODE_ENV=production
-heroku config:set SESSION_SECRET=your_secret
-heroku config:set STRIPE_SECRET_KEY=your_key
-
-# Deploy
-git push heroku main
-```
-
-### Vercel
-- Connect GitHub repository
-- Set environment variables
-- Deploy automatically
-
-## 🐛 Troubleshooting
-
-### Styles Not Loading
-- Check if `/css/style.css` exists in `public/` folder
-- Verify static middleware is configured
-- Check browser console for 404 errors
-
-### Database Connection Issues
-- Verify MongoDB is running
-- Check connection string in `.env`
-- Ensure network access (for cloud databases)
-
-### Payment Issues
-- Use Stripe test keys
-- Check Stripe dashboard for errors
-- Verify webhook endpoints
-
-### Email Not Sending
-- Check SMTP credentials
-- Verify Gmail App Password
-- Check firewall/network restrictions
+### Security Considerations
+- Use HTTPS in production
+- Secure session configuration
+- Environment variable protection
+- Input validation and sanitization
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create feature branch
-3. Make changes
+2. Create a feature branch
+3. Make your changes
 4. Test thoroughly
-5. Submit pull request
+5. Submit a pull request
 
-## 📝 License
+## 📄 License
 
-MIT License - see LICENSE file for details
+This project is licensed under the ISC License.
 
 ## 🆘 Support
 
-For issues and questions:
-1. Check troubleshooting section
-2. Review error logs
-3. Create GitHub issue with details
+For support and questions:
+- Check the documentation
+- Review environment configuration
+- Test email setup with `npm run test-email`
+- Ensure all dependencies are installed
 
 ---
 
-**Happy Event Managing! 🎉**
+**Eventify** - Making event management simple and engaging! 🎉

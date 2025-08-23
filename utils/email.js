@@ -1,10 +1,8 @@
 const nodemailer = require('nodemailer');
 
-// Create transporter
+// Create transporter for Google SMTP
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
-  secure: false, // true for 465, false for other ports
+  service: 'Gmail',
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -15,7 +13,7 @@ const transporter = nodemailer.createTransport({
 exports.sendWelcomeEmail = async (email, name) => {
   try {
     const mailOptions = {
-      from: process.env.SMTP_FROM,
+      from: process.env.SMTP_USER,
       to: email,
       subject: 'Welcome to Eventify! 🎉',
       html: `
@@ -70,11 +68,118 @@ exports.sendWelcomeEmail = async (email, name) => {
   }
 };
 
+// Send payment confirmation email
+exports.sendPaymentConfirmationEmail = async (email, name, eventTitle, amount, eventDate) => {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_USER,
+      to: email,
+      subject: `Payment Confirmed - ${eventTitle} 🎫`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #10b981 0%, #2563eb 100%); color: white; padding: 2rem; text-align: center; border-radius: 10px;">
+            <h1 style="margin: 0; font-size: 2rem;">Payment Confirmed!</h1>
+            <p style="margin: 1rem 0 0 0; font-size: 1.1rem; opacity: 0.9;">Your event registration is complete</p>
+          </div>
+          
+          <div style="padding: 2rem; background: #f8fafc;">
+            <h2 style="color: #1e293b; margin-bottom: 1rem;">Hello ${name}! 🎉</h2>
+            
+            <div style="background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 1.5rem;">
+              <h3 style="color: #10b981; margin: 0 0 1rem 0;">Event Registration Details:</h3>
+              <p style="color: #475569; line-height: 1.6; margin: 0 0 0.5rem 0;"><strong>Event:</strong> ${eventTitle}</p>
+              <p style="color: #475569; line-height: 1.6; margin: 0 0 0.5rem 0;"><strong>Date:</strong> ${eventDate}</p>
+              <p style="color: #475569; line-height: 1.6; margin: 0 0 0.5rem 0;"><strong>Amount Paid:</strong> $${amount}</p>
+              <p style="color: #475569; line-height: 1.6; margin: 0;"><strong>Status:</strong> <span style="color: #10b981; font-weight: 600;">Confirmed</span></p>
+            </div>
+            
+            <p style="color: #475569; line-height: 1.6; margin-bottom: 1.5rem;">
+              Your registration has been confirmed! You'll receive a reminder email the day before the event. 
+              Don't forget to bring your QR code for check-in.
+            </p>
+            
+            <div style="text-align: center;">
+              <a href="${process.env.BASE_URL || 'http://localhost:3000'}/dashboard" 
+                 style="background: #10b981; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600;">
+                View My Events
+              </a>
+            </div>
+          </div>
+          
+          <div style="background: #1e293b; color: white; padding: 1.5rem; text-align: center; border-radius: 0 0 10px 10px;">
+            <p style="margin: 0; font-size: 0.875rem;">© ${new Date().getFullYear()} Eventify. All rights reserved.</p>
+          </div>
+        </div>
+      `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Payment confirmation email sent:', info.messageId);
+    return info;
+  } catch (error) {
+    console.error('Payment confirmation email error:', error);
+    throw error;
+  }
+};
+
+// Send OTP email for password reset
+exports.sendOTPEmail = async (email, name, otp) => {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_USER,
+      to: email,
+      subject: 'Password Reset OTP - Eventify 🔐',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #f59e42 0%, #2563eb 100%); color: white; padding: 2rem; text-align: center; border-radius: 10px;">
+            <h1 style="margin: 0; font-size: 2rem;">Password Reset</h1>
+            <p style="margin: 1rem 0 0 0; font-size: 1.1rem; opacity: 0.9;">Use the OTP below to reset your password</p>
+          </div>
+          
+          <div style="padding: 2rem; background: #f8fafc;">
+            <h2 style="color: #1e293b; margin-bottom: 1rem;">Hello ${name}! 🔐</h2>
+            
+            <p style="color: #475569; line-height: 1.6; margin-bottom: 1.5rem;">
+              You requested a password reset for your Eventify account. Use the OTP below to complete the process.
+            </p>
+            
+            <div style="background: white; padding: 2rem; border-radius: 8px; border: 2px solid #f59e42; margin-bottom: 1.5rem; text-align: center;">
+              <h3 style="color: #f59e42; margin: 0 0 1rem 0; font-size: 1.5rem;">Your OTP Code</h3>
+              <div style="background: #fef3c7; padding: 1rem; border-radius: 6px; display: inline-block;">
+                <span style="font-size: 2rem; font-weight: bold; color: #f59e42; letter-spacing: 0.5rem;">${otp}</span>
+              </div>
+            </div>
+            
+            <p style="color: #dc2626; font-size: 0.875rem; margin-bottom: 1.5rem;">
+              ⚠️ This OTP will expire in 10 minutes. If you didn't request this reset, please ignore this email.
+            </p>
+            
+            <p style="color: #64748b; font-size: 0.875rem; text-align: center;">
+              If you have any questions, feel free to reach out to our support team.
+            </p>
+          </div>
+          
+          <div style="background: #1e293b; color: white; padding: 1.5rem; text-align: center; border-radius: 0 0 10px 10px;">
+            <p style="margin: 0; font-size: 0.875rem;">© ${new Date().getFullYear()} Eventify. All rights reserved.</p>
+          </div>
+        </div>
+      `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('OTP email sent:', info.messageId);
+    return info;
+  } catch (error) {
+    console.error('OTP email error:', error);
+    throw error;
+  }
+};
+
 // Send event reminder email
 exports.sendEventReminder = async (email, name, eventTitle, eventDate, eventLocation) => {
   try {
     const mailOptions = {
-      from: process.env.SMTP_FROM,
+      from: process.env.SMTP_USER,
       to: email,
       subject: `Reminder: ${eventTitle} is tomorrow! 📅`,
       html: `

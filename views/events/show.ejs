@@ -1,15 +1,16 @@
-<div class="container" style="max-width:700px;margin:2rem auto;">
+<div class="container" style="max-width:800px;margin:2rem auto;">
   <div class="card">
     <% if (event && event.bannerUrl) { %>
       <img src="<%= event.bannerUrl %>" alt="Event Banner" style="width:100%;border-radius:var(--radius);margin-bottom:1rem;max-height:240px;object-fit:cover;">
     <% } %>
     <h2 style="margin-bottom:0.5rem;"><%= event ? event.title : 'Event Title' %></h2>
     <p style="color:var(--muted);margin-bottom:1rem;">
-      <%= event ? event.location : '' %> &middot; <%= event ? event.date : '' %> <%= event ? event.time : '' %>
+      📍 <%= event ? event.location : '' %> &middot; 📅 <%= event ? event.date : '' %> &middot; 🕐 <%= event ? event.time : '' %>
     </p>
-    <p style="margin-bottom:1.5rem;"><%= event ? event.description : '' %></p>
-    <div style="display:flex;gap:2rem;align-items:center;margin-bottom:1rem;">
+    <p style="margin-bottom:1.5rem;line-height:1.6;"><%= event ? event.description : '' %></p>
+    <div style="display:flex;gap:2rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
       <div><strong>Price:</strong> $<%= event ? event.price : '0' %></div>
+      <div><strong>Category:</strong> <%= event ? event.category : '' %></div>
       <div><strong>Capacity:</strong> <%= event ? event.capacity : '0' %></div>
       <div><strong>Remaining Seats:</strong> <%= event ? event.remainingSeats : '0' %></div>
     </div>
@@ -79,13 +80,35 @@
     </div>
   </div>
   
+  <!-- Organizer Contact Information -->
+  <div class="card" style="margin-top:2rem;">
+    <h3 style="margin-bottom:1rem;">📞 Contact Information</h3>
+    <div style="display:flex;align-items:center;gap:1rem;padding:1rem;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border);">
+      <div style="width:50px;height:50px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:1.2rem;">
+        <%= organizer ? organizer.name.charAt(0).toUpperCase() : 'O' %>
+      </div>
+      <div>
+        <h4 style="margin:0 0 0.25rem 0;color:var(--primary);"><%= organizer ? organizer.name : 'Organizer' %></h4>
+        <p style="margin:0;color:var(--muted);font-size:0.875rem;">
+          📧 <a href="mailto:<%= organizer ? organizer.email : '' %>" style="color:var(--primary);text-decoration:none;"><%= organizer ? organizer.email : 'organizer@example.com' %></a>
+        </p>
+        <% if (organizer && organizer.phone) { %>
+          <p style="margin:0.25rem 0 0 0;color:var(--muted);font-size:0.875rem;">
+            📱 <%= organizer.phone %>
+          </p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Event Chat Section -->
   <% if (user) { %>
     <div class="card" style="margin-top:2rem;">
-      <h3>Event Chat</h3>
-      <div id="chat-box" style="height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);padding:0.5rem;margin-bottom:1rem;background:#f8fafc;"></div>
+      <h3 style="margin-bottom:1rem;">💬 Event Chat</h3>
+      <div id="chat-box" style="height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);padding:1rem;margin-bottom:1rem;background:#f8fafc;font-size:0.875rem;"></div>
       <form id="chat-form" data-event-id="<%= event._id %>" style="display:flex;gap:0.5rem;">
-        <input id="chat-input" type="text" placeholder="Type a message..." style="flex:1;">
-        <button class="btn" type="submit">Send</button>
+        <input id="chat-input" type="text" placeholder="Type a message..." style="flex:1;padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius);">
+        <button class="btn btn-accent" type="submit">Send</button>
       </form>
     </div>
     <script>window.currentUser = { name: '<%= user.name %>' };</script>

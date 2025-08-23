@@ -1,5 +1,6 @@
 const Event = require('../models/Event');
 const RSVP = require('../models/RSVP');
+const User = require('../models/User');
 const path = require('path');
 
 exports.listEvents = async (req, res) => {
@@ -79,11 +80,15 @@ exports.showEvent = async (req, res) => {
       });
     }
     
+    // Get organizer information
+    const organizer = await User.findById(event.createdBy);
+    
     res.render('events/show', { 
       title: event.title, 
       event, 
       user: req.session.user,
-      userRSVPs: userRSVPs
+      userRSVPs: userRSVPs,
+      organizer: organizer
     });
   } catch (err) {
     req.flash('error', 'Could not load event.');

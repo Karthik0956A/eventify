@@ -5,6 +5,32 @@
       <a href="/events">Events</a>
       <% if (user) { %>
         <a href="/dashboard">Dashboard</a>
+        
+        <!-- Notification Bell -->
+        <div class="notification-container" style="position:relative;">
+          <button id="notificationBell" style="background:none;border:none;cursor:pointer;position:relative;padding:0.5rem;">
+            <span style="font-size:1.2rem;">🔔</span>
+            <span id="notificationCount" style="position:absolute;top:0;right:0;background:var(--accent);color:white;border-radius:50%;width:18px;height:18px;font-size:0.75rem;display:flex;align-items:center;justify-content:center;display:none;">0</span>
+          </button>
+          <div id="notificationDropdown" style="position:absolute;top:100%;right:0;background:white;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 6px rgba(0,0,0,0.1);min-width:300px;max-height:400px;overflow-y:auto;z-index:1000;display:none;">
+            <div style="padding:1rem;border-bottom:1px solid #e5e7eb;">
+              <h4 style="margin:0;color:var(--primary);">Notifications</h4>
+            </div>
+            <div id="notificationList" style="padding:0;">
+              <!-- Notifications will be loaded here -->
+            </div>
+            <div style="padding:0.5rem;border-top:1px solid #e5e7eb;text-align:center;">
+              <button id="markAllRead" style="background:var(--primary);color:white;border:none;padding:0.5rem 1rem;border-radius:4px;cursor:pointer;font-size:0.875rem;">Mark All Read</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Profile Link -->
+        <a href="/auth/profile" style="display:flex;align-items:center;gap:0.5rem;">
+          <span style="font-size:1.1rem;">👤</span>
+          <span>Profile</span>
+        </a>
+        
         <% if (user.role === 'admin') { %>
           <span style="color:var(--accent);font-weight:600;">Admin</span>
         <% } else if (user.role === 'organizer') { %>
@@ -18,3 +44,117 @@
     </div>
   </div>
 </nav>
+
+<script>
+// Notification functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const notificationBell = document.getElementById('notificationBell');
+  const notificationDropdown = document.getElementById('notificationDropdown');
+  const notificationCount = document.getElementById('notificationCount');
+  const notificationList = document.getElementById('notificationList');
+  const markAllRead = document.getElementById('markAllRead');
+
+  if (notificationBell) {
+    // Load notifications on page load
+    loadNotifications();
+    loadUnreadCount();
+
+    // Toggle dropdown
+    notificationBell.addEventListener('click', function(e) {
+      e.stopPropagation();
+      notificationDropdown.style.display = notificationDropdown.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function() {
+      notificationDropdown.style.display = 'none';
+    });
+
+    // Mark all as read
+    markAllRead.addEventListener('click', function() {
+      fetch('/notifications/mark-all-read', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          loadNotifications();
+          loadUnreadCount();
+        }
+      })
+      .catch(error => console.error('Error:', error));
+    });
+  }
+
+  function loadNotifications() {
+    fetch('/notifications')
+      .then(response => response.json())
+      .then(notifications => {
+        notificationList.innerHTML = '';
+        if (notifications.length === 0) {
+          notificationList.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--muted);">No notifications</div>';
+        } else {
+          notifications.forEach(notification => {
+            const notificationItem = document.createElement('div');
+            notificationItem.className = 'notification-item';
+            notificationItem.style.cssText = `
+              padding: 1rem;
+              border-bottom: 1px solid #f3f4f6;
+              cursor: pointer;
+              ${!notification.read ? 'background-color: #fef3c7;' : ''}
+            `;
+            
+            notificationItem.innerHTML = `
+              <div style="font-weight: 600; color: var(--primary); margin-bottom: 0.25rem;">${notification.title}</div>
+              <div style="color: var(--muted); font-size: 0.875rem;">${notification.message}</div>
+              <div style="color: var(--muted); font-size: 0.75rem; margin-top: 0.5rem;">
+                ${new Date(notification.createdAt).toLocaleDateString()}
+              </div>
+            `;
+            
+            notificationItem.addEventListener('click', function() {
+              if (!notification.read) {
+                markAsRead(notification._id);
+              }
+            });
+            
+            notificationList.appendChild(notificationItem);
+          });
+        }
+      })
+      .catch(error => console.error('Error:', error));
+  }
+
+  function loadUnreadCount() {
+    fetch('/notifications/unread-count')
+      .then(response => response.json())
+      .then(data => {
+        if (data.count > 0) {
+          notificationCount.textContent = data.count;
+          notificationCount.style.display = 'flex';
+        } else {
+          notificationCount.style.display = 'none';
+        }
+      })
+      .catch(error => console.error('Error:', error));
+  }
+
+  function markAsRead(notificationId) {
+    fetch(`/notifications/${notificationId}/read`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      loadNotifications();
+      loadUnreadCount();
+    })
+    .catch(error => console.error('Error:', error));
+  }
+});
+</script>

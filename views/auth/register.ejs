@@ -6,19 +6,108 @@
   <title>Register - Eventify</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" href="/images/favicon.ico">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body>
-  <div class="container" style="max-width:400px;margin:3rem auto;">
-    <div class="card">
-      <h2 style="text-align:center;margin-bottom:1.5rem;">Create an Account</h2>
+<body style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;">
+  <div class="container" style="max-width:500px;margin:2rem;">
+    <div class="card" style="text-align:center;padding:2rem;">
+      <div style="margin-bottom:2rem;">
+        <h1 style="margin:0;color:var(--primary);font-size:2rem;">🚀</h1>
+        <h2 style="margin:0.5rem 0;color:var(--primary);">Join Eventify</h2>
+        <p style="color:var(--muted);margin:0;">Create your account and start exploring events</p>
+      </div>
+      
       <form action="/auth/register" method="POST">
-        <input type="text" name="name" placeholder="Full Name" required>
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button class="btn" type="submit" style="width:100%;margin-top:1rem;">Register</button>
+        <div style="margin-bottom:1rem;">
+          <label for="name" style="display:block;text-align:left;font-weight:600;margin-bottom:0.5rem;">Full Name</label>
+          <input type="text" id="name" name="name" required 
+                 style="width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius);box-sizing:border-box;"
+                 placeholder="Enter your full name">
+        </div>
+        
+        <div style="margin-bottom:1rem;">
+          <label for="email" style="display:block;text-align:left;font-weight:600;margin-bottom:0.5rem;">Email Address</label>
+          <input type="email" id="email" name="email" required 
+                 style="width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius);box-sizing:border-box;"
+                 placeholder="Enter your email address">
+        </div>
+        
+        <div style="margin-bottom:1rem;">
+          <label for="phone" style="display:block;text-align:left;font-weight:600;margin-bottom:0.5rem;">Phone Number</label>
+          <input type="tel" id="phone" name="phone" 
+                 style="width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius);box-sizing:border-box;"
+                 placeholder="Enter your phone number (optional)">
+        </div>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+          <div>
+            <label for="age" style="display:block;text-align:left;font-weight:600;margin-bottom:0.5rem;">Age</label>
+            <input type="number" id="age" name="age" min="13" max="120"
+                   style="width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius);box-sizing:border-box;"
+                   placeholder="Age (optional)">
+          </div>
+          <div>
+            <label for="gender" style="display:block;text-align:left;font-weight:600;margin-bottom:0.5rem;">Gender</label>
+            <select id="gender" name="gender" 
+                    style="width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius);box-sizing:border-box;">
+              <option value="">Select gender (optional)</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+              <option value="prefer-not-to-say">Prefer not to say</option>
+            </select>
+          </div>
+        </div>
+        
+        <div style="margin-bottom:1rem;">
+          <label for="password" style="display:block;text-align:left;font-weight:600;margin-bottom:0.5rem;">Password</label>
+          <input type="password" id="password" name="password" required 
+                 style="width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius);box-sizing:border-box;"
+                 placeholder="Create a password (min 6 characters)">
+        </div>
+        
+        <div style="margin-bottom:1.5rem;">
+          <label for="confirmPassword" style="display:block;text-align:left;font-weight:600;margin-bottom:0.5rem;">Confirm Password</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" required 
+                 style="width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius);box-sizing:border-box;"
+                 placeholder="Confirm your password">
+        </div>
+        
+        <button class="btn btn-accent" type="submit" style="width:100%;margin-bottom:1rem;">
+          Create Account
+        </button>
       </form>
-      <p style="text-align:center;margin-top:1rem;">Already have an account? <a href="/auth/login" style="color:var(--primary);">Login</a></p>
+      
+      <div style="border-top:1px solid var(--border);padding-top:1rem;">
+        <p style="margin:0;color:var(--muted);font-size:0.875rem;">
+          Already have an account? 
+          <a href="/auth/login" style="color:var(--primary);text-decoration:none;font-weight:600;">Login here</a>
+        </p>
+      </div>
     </div>
   </div>
+
+  <script>
+  // Password confirmation validation
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form[action="/auth/register"]');
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirmPassword');
+
+    form.addEventListener('submit', function(e) {
+      if (password.value !== confirmPassword.value) {
+        e.preventDefault();
+        alert('Passwords do not match!');
+        return false;
+      }
+
+      if (password.value.length < 6) {
+        e.preventDefault();
+        alert('Password must be at least 6 characters long!');
+        return false;
+      }
+    });
+  });
+  </script>
 </body>
 </html>

@@ -10,10 +10,11 @@
   </div>
 </div>
 
-<form method="GET" action="/events" class="card" style="margin-bottom:2rem;">
+<!-- Dynamic Search Bar -->
+<div class="card" style="margin-bottom:2rem;">
   <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;">
-    <input type="text" name="q" placeholder="Search events..." style="flex:2;">
-    <select name="category" style="flex:1;">
+    <input type="text" id="searchInput" placeholder="Search events..." style="flex:2;padding:0.75rem;border:1px solid #e5e7eb;border-radius:4px;">
+    <select id="categoryFilter" style="flex:1;padding:0.75rem;border:1px solid #e5e7eb;border-radius:4px;">
       <option value="">All Categories</option>
       <option value="Technology">Technology</option>
       <option value="Business">Business</option>
@@ -22,39 +23,124 @@
       <option value="Sports">Sports</option>
       <option value="Other">Other</option>
     </select>
-    <input type="date" name="date" style="flex:1;">
-    <button class="btn" type="submit">Filter</button>
+    <input type="date" id="dateFilter" style="flex:1;padding:0.75rem;border:1px solid #e5e7eb;border-radius:4px;">
+    <button class="btn" onclick="clearFilters()">Clear</button>
   </div>
-</form>
+</div>
 
 <div class="container">
-  <% if (events && events.length) { %>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:2rem;">
+  <div id="eventsContainer" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:2rem;">
+    <% if (events && events.length) { %>
       <% events.forEach(event => { %>
-        <div class="card">
+        <div class="event-card card" data-title="<%= event.title.toLowerCase() %>" data-category="<%= event.category %>" data-date="<%= event.date %>">
           <img src="<%= event.bannerUrl || '/images/default-event.jpg' %>" alt="Event Banner" style="width:100%;border-radius:var(--radius);margin-bottom:1rem;max-height:180px;object-fit:cover;">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;">
-            <h2 style="margin:0;"><%= event.title %></h2>
+            <h2 style="margin:0;font-size:1.25rem;"><%= event.title %></h2>
             <% if (user && user.role === 'admin') { %>
               <span style="background:var(--primary);color:white;padding:0.25rem 0.5rem;border-radius:var(--radius);font-size:0.75rem;"><%= event.status %></span>
             <% } %>
           </div>
-          <p style="color:var(--muted);margin:0 0 1rem 0;"><%= event.location %> &middot; <%= event.date %></p>
-          <p><%= event.description ? event.description.substring(0, 100) : '' %>...</p>
-          <div style="display:flex;gap:0.5rem;margin-top:1rem;">
-            <a href="/events/<%= event._id %>" class="btn btn-accent">View Details</a>
+          <p style="color:var(--muted);margin:0 0 0.5rem 0;font-size:0.875rem;">
+            📍 <%= event.location %> &middot; 📅 <%= event.date %>
+          </p>
+          <p style="color:var(--muted);margin:0 0 1rem 0;font-size:0.875rem;line-height:1.4;">
+            <%= event.description ? event.description.substring(0, 80) : '' %>...
+          </p>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+            <span style="font-weight:600;color:var(--primary);font-size:1.1rem;">
+              $<%= event.price %>
+            </span>
+            <span style="color:var(--muted);font-size:0.875rem;">
+              <%= event.remainingSeats %> seats left
+            </span>
+          </div>
+          <div style="display:flex;gap:0.5rem;">
+            <a href="/events/<%= event._id %>" class="btn btn-accent" style="flex:1;text-align:center;">View Details</a>
             <% if (user && (String(event.createdBy) === user._id || user.role === 'admin')) { %>
               <a href="/events/<%= event._id %>/edit" class="btn" style="background:var(--accent);">Edit</a>
             <% } %>
           </div>
         </div>
       <% }) %>
-    </div>
-  <% } else { %>
-    <div class="card" style="text-align:center;">
-      <h3>No events found</h3>
-      <p style="color:var(--muted);margin-bottom:1rem;">Be the first to create an amazing event!</p>
-      <a href="/events/new" class="btn btn-accent">Create Your First Event</a>
-    </div>
-  <% } %>
+    <% } else { %>
+      <div class="card" style="text-align:center;grid-column:1/-1;">
+        <h3>No events found</h3>
+        <p style="color:var(--muted);margin-bottom:1rem;">Be the first to create an amazing event!</p>
+        <a href="/events/new" class="btn btn-accent">Create Your First Event</a>
+      </div>
+    <% } %>
+  </div>
 </div>
+
+<script>
+// Dynamic search functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('searchInput');
+  const categoryFilter = document.getElementById('categoryFilter');
+  const dateFilter = document.getElementById('dateFilter');
+  const eventCards = document.querySelectorAll('.event-card');
+
+  function filterEvents() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const selectedCategory = categoryFilter.value;
+    const selectedDate = dateFilter.value;
+
+    eventCards.forEach(card => {
+      const title = card.dataset.title;
+      const category = card.dataset.category;
+      const date = card.dataset.date;
+
+      let showCard = true;
+
+      // Search filter
+      if (searchTerm && !title.includes(searchTerm)) {
+        showCard = false;
+      }
+
+      // Category filter
+      if (selectedCategory && category !== selectedCategory) {
+        showCard = false;
+      }
+
+      // Date filter
+      if (selectedDate && date !== selectedDate) {
+        showCard = false;
+      }
+
+      card.style.display = showCard ? 'block' : 'none';
+    });
+
+    // Show/hide "no events" message
+    const visibleCards = document.querySelectorAll('.event-card[style*="display: block"], .event-card:not([style*="display: none"])');
+    const noEventsMessage = document.querySelector('.card[style*="text-align:center"]');
+    
+    if (visibleCards.length === 0 && noEventsMessage) {
+      noEventsMessage.style.display = 'block';
+    } else if (noEventsMessage) {
+      noEventsMessage.style.display = 'none';
+    }
+  }
+
+  // Add event listeners
+  searchInput.addEventListener('input', filterEvents);
+  categoryFilter.addEventListener('change', filterEvents);
+  dateFilter.addEventListener('change', filterEvents);
+});
+
+function clearFilters() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('categoryFilter').value = '';
+  document.getElementById('dateFilter').value = '';
+  
+  // Show all cards
+  document.querySelectorAll('.event-card').forEach(card => {
+    card.style.display = 'block';
+  });
+  
+  // Hide "no events" message if it exists
+  const noEventsMessage = document.querySelector('.card[style*="text-align:center"]');
+  if (noEventsMessage) {
+    noEventsMessage.style.display = 'none';
+  }
+}
+</script>

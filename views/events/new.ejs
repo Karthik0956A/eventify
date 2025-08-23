@@ -1,0 +1,18 @@
+<div class="container" style="max-width:600px;margin:2rem auto;">
+  <div class="card">
+    <h2 style="text-align:center;margin-bottom:1.5rem;">Create New Event</h2>
+    <form action="/events" method="POST" enctype="multipart/form-data">
+      <input type="text" name="title" placeholder="Event Title" required>
+      <textarea name="description" placeholder="Description" rows="4" required></textarea>
+      <input type="text" name="location" placeholder="Location" required>
+      <input type="date" name="date" required>
+      <input type="time" name="time" required>
+      <input type="text" name="category" placeholder="Category" required>
+      <input type="number" name="price" placeholder="Price (USD)" min="0" step="0.01">
+      <input type="number" name="capacity" placeholder="Capacity" min="1" required>
+      <label style="margin-bottom:0.5rem;display:block;">Banner Image</label>
+      <input type="file" name="banner" accept="image/*">
+      <button class="btn" type="submit" style="width:100%;margin-top:1rem;">Create Event</button>
+    </form>
+  </div>
+</div>

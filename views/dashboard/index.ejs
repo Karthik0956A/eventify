@@ -1,0 +1,171 @@
+<div class="container">
+  <div class="hero">
+    <h1>Welcome, <%= user ? user.name : 'User' %>!</h1>
+    <p>Manage your events, registrations, and analytics here.</p>
+    <div style="margin-top:1rem;">
+      <a href="/events" class="btn">Browse Events</a>
+      <a href="/events/new" class="btn btn-accent">+ Create Event</a>
+    </div>
+  </div>
+  
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:2rem;">
+    <% if (user.role === 'user') { %>
+      <div class="card">
+        <h2>Your Registered Events</h2>
+        <% if (registeredEvents && registeredEvents.length) { %>
+          <ul style="list-style:none;padding:0;">
+            <% registeredEvents.forEach(ev => { %>
+              <li style="display:flex;align-items:center;gap:1rem;padding:0.5rem 0;border-bottom:1px solid var(--border);">
+                <a href="/events/<%= ev._id %>" style="color:var(--primary);text-decoration:none;flex:1;"><%= ev.title %></a>
+                <% if (qrCodes && qrCodes[ev._id]) { %>
+                  <img src="<%= qrCodes[ev._id] %>" alt="QR Code" style="width:48px;height:48px;">
+                <% } %>
+              </li>
+            <% }) %>
+          </ul>
+        <% } else { %>
+          <div style="color:var(--muted);text-align:center;padding:1rem;">
+            <p>No registered events yet.</p>
+            <a href="/events" class="btn btn-accent">Browse Events</a>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+    
+    <% if (user.role === 'organizer' || user.role === 'admin') { %>
+      <div class="card">
+        <h2>Your Created Events</h2>
+        <% if (createdEvents && createdEvents.length) { %>
+          <ul style="list-style:none;padding:0;">
+            <% createdEvents.forEach(ev => { %>
+              <li style="display:flex;align-items:center;gap:1rem;padding:0.5rem 0;border-bottom:1px solid var(--border);">
+                <a href="/events/<%= ev._id %>" style="color:var(--primary);text-decoration:none;flex:1;"><%= ev.title %></a>
+                <a href="/events/<%= ev._id %>/edit" class="btn" style="padding:0.25rem 0.5rem;font-size:0.875rem;">Edit</a>
+              </li>
+            <% }) %>
+          </ul>
+        <% } else { %>
+          <div style="color:var(--muted);text-align:center;padding:1rem;">
+            <p>No events created yet.</p>
+            <a href="/events/new" class="btn btn-accent">Create Your First Event</a>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+    
+    <% if (user.role === 'admin') { %>
+      <div class="card">
+        <h2>All Users</h2>
+        <ul style="list-style:none;padding:0;">
+          <% allUsers.forEach(u => { %>
+            <li style="padding:0.5rem 0;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+              <div>
+                <strong><%= u.name %></strong> (<%= u.email %>) - <span style="color:var(--accent);"><%= u.role %></span>
+              </div>
+              <a href="/auth/promote/<%= u._id %>" class="btn" style="padding:0.25rem 0.5rem;font-size:0.875rem;background:var(--accent);">Promote</a>
+            </li>
+          <% }) %>
+        </ul>
+      </div>
+      
+      <div class="card">
+        <h2>Pending Events Review</h2>
+        <p style="color:var(--muted);margin-bottom:1rem;">Review and approve events before they go live.</p>
+        <a href="/events/admin/pending" class="btn btn-accent">Review Pending Events</a>
+      </div>
+      
+      <div class="card">
+        <h2>All Events</h2>
+        <ul style="list-style:none;padding:0;">
+          <% allEvents.forEach(ev => { %>
+            <li style="padding:0.5rem 0;border-bottom:1px solid var(--border);">
+              <a href="/events/<%= ev._id %>" style="color:var(--primary);text-decoration:none;"><%= ev.title %></a>
+            </li>
+          <% }) %>
+        </ul>
+      </div>
+    <% } %>
+    
+    <div class="card">
+      <h2>Analytics</h2>
+      <canvas id="analyticsChart" width="300" height="180"></canvas>
+      <div style="color:var(--muted);margin-top:1rem;">
+        <div style="display:flex;justify-content:space-around;text-align:center;">
+          <div>
+            <div style="font-size:1.5rem;font-weight:bold;color:var(--primary);"><%= analytics.rsvps %></div>
+            <div>RSVPs</div>
+          </div>
+          <div>
+            <div style="font-size:1.5rem;font-weight:bold;color:var(--accent);"><%= analytics.payments %></div>
+            <div>Payments</div>
+          </div>
+          <div>
+            <div style="font-size:1.5rem;font-weight:bold;color:var(--primary-dark);"><%= analytics.attendance %></div>
+            <div>Attendance</div>
+          </div>
+          <% if (user.role === 'organizer' || user.role === 'admin') { %>
+            <div>
+              <div style="font-size:1.5rem;font-weight:bold;color:var(--accent);"><%= analytics.pending %></div>
+              <div>Pending</div>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    
+    <% if (user.role === 'admin' && pendingEvents && pendingEvents.length) { %>
+      <div class="card">
+        <h2>Recent Pending Events</h2>
+        <p style="color:var(--muted);margin-bottom:1rem;">Latest events awaiting approval</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;">
+          <% pendingEvents.slice(0, 3).forEach(event => { %>
+            <div style="background:var(--bg);padding:1rem;border-radius:var(--radius);border:1px solid var(--border);">
+              <h4 style="margin:0 0 0.5rem 0;"><%= event.title %></h4>
+              <p style="margin:0 0 0.5rem 0;color:var(--muted);font-size:0.875rem;">By: <%= event.createdBy.name %></p>
+              <p style="margin:0 0 0.5rem 0;color:var(--muted);font-size:0.875rem;"><%= event.date %> at <%= event.location %></p>
+              <a href="/events/admin/pending" class="btn" style="padding:0.25rem 0.5rem;font-size:0.875rem;">Review</a>
+            </div>
+          <% }) %>
+        </div>
+        <div style="margin-top:1rem;">
+          <a href="/events/admin/pending" class="btn btn-accent">View All Pending Events</a>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('analyticsChart');
+if (ctx) {
+  const labels = ['RSVPs', 'Payments', 'Attendance'];
+  const data = [<%= analytics.rsvps %>, <%= analytics.payments %>, <%= analytics.attendance %>];
+  
+  <% if (user.role === 'organizer' || user.role === 'admin') { %>
+    labels.push('Pending');
+    data.push(<%= analytics.pending %>);
+  <% } %>
+  
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Stats',
+        data: data,
+        backgroundColor: ['#2563eb', '#f59e42', '#1e40af', '#f59e42']
+      }]
+    },
+    options: { 
+      responsive: true, 
+      plugins: { legend: { display: false } },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+</script>

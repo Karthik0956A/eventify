@@ -1,0 +1,57 @@
+<div class="container">
+  <div class="hero">
+    <h1>Pending Events Review</h1>
+    <p>Review and approve events before they go live.</p>
+    <div style="margin-top:1rem;">
+      <form action="/events/admin/approve-all" method="POST" style="display:inline;">
+        <button class="btn btn-accent" type="submit" onclick="return confirm('Are you sure you want to approve ALL pending events?')">Approve All Events</button>
+      </form>
+      <a href="/dashboard" class="btn" style="margin-left:0.5rem;">Back to Dashboard</a>
+    </div>
+  </div>
+
+  <% if (events && events.length) { %>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:2rem;">
+      <% events.forEach(event => { %>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;">
+            <h3 style="margin:0;"><%= event.title %></h3>
+            <span style="background:var(--accent);color:white;padding:0.25rem 0.5rem;border-radius:var(--radius);font-size:0.875rem;">Pending</span>
+          </div>
+          
+          <% if (event.bannerUrl) { %>
+            <img src="<%= event.bannerUrl %>" alt="Event Banner" style="width:100%;border-radius:var(--radius);margin-bottom:1rem;max-height:200px;object-fit:cover;">
+          <% } %>
+          
+          <p style="margin:0 0 0.5rem 0;"><strong>Created by:</strong> <%= event.createdBy.name %> (<%= event.createdBy.email %>)</p>
+          <p style="margin:0 0 0.5rem 0;"><strong>Location:</strong> <%= event.location %></p>
+          <p style="margin:0 0 0.5rem 0;"><strong>Date:</strong> <%= event.date %> at <%= event.time %></p>
+          <p style="margin:0 0 0.5rem 0;"><strong>Category:</strong> <%= event.category %></p>
+          <p style="margin:0 0 0.5rem 0;"><strong>Price:</strong> $<%= event.price %></p>
+          <p style="margin:0 0 1rem 0;"><strong>Capacity:</strong> <%= event.capacity %></p>
+          
+          <p style="margin:0 0 1rem 0;"><%= event.description %></p>
+          
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+            <form action="/events/admin/approve/<%= event._id %>" method="POST" style="margin:0;">
+              <button class="btn btn-accent" type="submit">Approve</button>
+            </form>
+            
+            <form action="/events/admin/reject/<%= event._id %>" method="POST" style="margin:0;display:inline;">
+              <input type="text" name="rejectionReason" placeholder="Rejection reason (optional)" style="margin-bottom:0.5rem;">
+              <button class="btn" type="submit" style="background:#dc2626;color:white;">Reject</button>
+            </form>
+            
+            <a href="/events/<%= event._id %>" class="btn" style="background:var(--muted);">View Details</a>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="card" style="text-align:center;">
+      <h3>No Pending Events</h3>
+      <p style="color:var(--muted);">All events have been reviewed!</p>
+      <a href="/dashboard" class="btn btn-accent">Back to Dashboard</a>
+    </div>
+  <% } %>
+</div>

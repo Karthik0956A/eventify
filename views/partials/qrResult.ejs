@@ -1,0 +1,14 @@
+<div class="container" style="text-align:center;margin-top:4rem;">
+  <div class="card">
+    <% if (valid) { %>
+      <h2>QR Code Valid!</h2>
+      <p>Attendee: <%= rsvp.userId.name %> (<%= rsvp.userId.email %>)</p>
+      <p>Event: <%= rsvp.eventId.title %></p>
+      <p>Status: Checked-in</p>
+    <% } else { %>
+      <h2 style="color:#dc2626;">Invalid QR Code</h2>
+      <p>This ticket is not valid or not paid.</p>
+    <% } %>
+    <a href="/" class="btn">Go Home</a>
+  </div>
+</div>

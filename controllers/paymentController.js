@@ -1,0 +1,159 @@
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const Event = require('../models/Event');
+const RSVP = require('../models/RSVP');
+const Payment = require('../models/Payment');
+
+exports.createCheckoutSession = async (req, res) => {
+  try {
+    const { eventId } = req.body;
+    const event = await Event.findById(eventId);
+    if (!event) {
+      req.flash('error', 'Event not found');
+      return res.redirect('/events');
+    }
+
+    // Check if event is approved
+    if (event.status !== 'approved') {
+      req.flash('error', 'This event is not yet approved');
+      return res.redirect('/events/' + eventId);
+    }
+
+    // Check if event has available seats
+    if (event.remainingSeats <= 0) {
+      req.flash('error', 'Event is full');
+      return res.redirect('/events/' + eventId);
+    }
+
+    // Find or create RSVP
+    let rsvp = await RSVP.findOne({ userId: req.session.user._id, eventId: event._id });
+    
+    if (!rsvp) {
+      // Create new RSVP
+      rsvp = await RSVP.create({ 
+        userId: req.session.user._id, 
+        eventId: event._id, 
+        paymentStatus: 'pending' 
+      });
+      
+      // Decrement available seats
+      event.remainingSeats -= 1;
+      await event.save();
+      
+      console.log(`RSVP created for user ${req.session.user._id} on event ${event._id}`);
+    } else if (rsvp.paymentStatus === 'paid') {
+      req.flash('error', 'You have already registered for this event');
+      return res.redirect('/events/' + eventId);
+    }
+
+    // Create Stripe session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      line_items: [{
+        price_data: {
+          currency: 'usd',
+          product_data: { name: event.title },
+          unit_amount: Math.round(event.price * 100),
+        },
+        quantity: 1,
+      }],
+      customer_email: req.session.user.email,
+      success_url: `${req.protocol}://${req.get('host')}/payments/success?session_id={CHECKOUT_SESSION_ID}&eventId=${event._id}`,
+      cancel_url: `${req.protocol}://${req.get('host')}/payments/cancel?eventId=${event._id}`,
+      metadata: {
+        eventId: event._id.toString(),
+        userId: req.session.user._id.toString(),
+        rsvpId: rsvp._id.toString()
+      }
+    });
+
+    // Store payment
+    await Payment.create({
+      userId: req.session.user._id,
+      eventId: event._id,
+      rsvpId: rsvp._id,
+      amount: event.price,
+      stripeSessionId: session.id,
+      status: 'pending',
+    });
+
+    console.log(`Payment session created: ${session.id} for event ${event._id}`);
+    res.redirect(303, session.url);
+  } catch (err) {
+    console.error('Payment session creation error:', err);
+    req.flash('error', 'Could not start payment. Please try again.');
+    res.redirect('/events');
+  }
+};
+
+exports.paymentSuccess = async (req, res) => {
+  try {
+    const { session_id, eventId } = req.query;
+    
+    // Verify the session with Stripe
+    const session = await stripe.checkout.sessions.retrieve(session_id);
+    if (session.payment_status !== 'paid') {
+      req.flash('error', 'Payment not completed');
+      return res.redirect('/events/' + eventId);
+    }
+
+    // Find and update payment
+    const payment = await Payment.findOne({ stripeSessionId: session_id });
+    if (!payment) {
+      req.flash('error', 'Payment record not found');
+      return res.redirect('/events/' + eventId);
+    }
+
+    payment.status = 'paid';
+    await payment.save();
+
+    // Update RSVP payment status
+    const rsvp = await RSVP.findById(payment.rsvpId);
+    if (rsvp) {
+      rsvp.paymentStatus = 'paid';
+      await rsvp.save();
+      console.log(`RSVP ${rsvp._id} marked as paid`);
+    }
+
+    req.flash('success', 'Payment successful! You are registered for the event.');
+    res.redirect('/dashboard');
+  } catch (err) {
+    console.error('Payment success error:', err);
+    req.flash('error', 'Payment could not be verified. Please contact support.');
+    res.redirect('/events');
+  }
+};
+
+exports.paymentCancel = async (req, res) => {
+  try {
+    const { eventId } = req.query;
+    
+    // Find the pending RSVP and remove it
+    const rsvp = await RSVP.findOne({ 
+      userId: req.session.user._id, 
+      eventId: eventId, 
+      paymentStatus: 'pending' 
+    });
+    
+    if (rsvp) {
+      // Remove the RSVP
+      await RSVP.findByIdAndDelete(rsvp._id);
+      
+      // Increment available seats back
+      const event = await Event.findById(eventId);
+      if (event) {
+        event.remainingSeats += 1;
+        await event.save();
+      }
+      
+      console.log(`RSVP cancelled and removed for event ${eventId}`);
+    }
+
+    req.flash('info', 'Payment cancelled. Your RSVP has been removed.');
+    res.redirect('/events/' + eventId);
+  } catch (err) {
+    console.error('Payment cancel error:', err);
+    req.flash('error', 'Could not process cancellation.');
+    res.redirect('/events');
+  }
+};

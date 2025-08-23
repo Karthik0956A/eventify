@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || 'Event Management' %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="/images/favicon.ico">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  <div class="container">
+    <%- body %>
+  </div>
+  <%- include('../partials/footer') %>
+  <script>
+    <% if (success && success.length) { %>
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: '<%= success[0] %>',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
+    <% } %>
+    <% if (error && error.length) { %>
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'error',
+        title: '<%= error[0] %>',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
+    <% } %>
+  </script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+/*
+  Modern, clean, and aesthetic CSS for Event Management Platform
+  - Responsive layout
+  - Card styles
+  - Buttons, forms, modals
+  - Navbar, footer
+  - Toasts
+*/
+
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1e40af;
+  --accent: #f59e42;
+  --bg: #f8fafc;
+  --surface: #fff;
+  --border: #e5e7eb;
+  --text: #1e293b;
+  --muted: #64748b;
+  --radius: 0.75rem;
+  --shadow: 0 2px 8px rgba(30,41,59,0.08);
+}
+
+body {
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  transition: box-shadow 0.2s;
+}
+.card:hover {
+  box-shadow: 0 4px 16px rgba(30,41,59,0.12);
+}
+
+.btn {
+  display: inline-block;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  font-size: 1rem;
+  line-height: 1;
+}
+.btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+.btn-accent {
+  background: var(--accent);
+  color: #fff;
+}
+.btn-accent:hover {
+  background: #d97706;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: #fff;
+}
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+.btn-secondary {
+  background: var(--muted);
+  color: #fff;
+}
+.btn-secondary:hover {
+  background: #475569;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  background: #f1f5f9;
+  color: var(--text);
+  transition: border 0.2s;
+  box-sizing: border-box;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--primary);
+  outline: none;
+  background: #fff;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.navbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow);
+}
+.navbar .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.navbar a {
+  color: var(--text);
+  text-decoration: none;
+  margin-left: 1.5rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.navbar a:hover {
+  color: var(--primary);
+}
+
+.footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0;
+  text-align: center;
+  color: var(--muted);
+  margin-top: 3rem;
+}
+
+.hero {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  color: #fff;
+  padding: 3rem 1rem;
+  border-radius: var(--radius);
+  margin-bottom: 2rem;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.hero h1 {
+  margin: 0 0 1rem 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+.hero p {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+.toast {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: var(--primary);
+  color: #fff;
+  padding: 1rem 2rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  z-index: 9999;
+  opacity: 0.95;
+  font-weight: 500;
+  display: none;
+}
+.toast.show {
+  display: block;
+}
+
+/* Form improvements */
+form {
+  margin: 0;
+}
+
+/* List improvements */
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+/* Image improvements */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Grid improvements */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+/* Responsive improvements */
+@media (max-width: 700px) {
+  .container {
+    padding: 1rem 0.5rem;
+  }
+  .card {
+    padding: 1rem;
+  }
+  .navbar .container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .hero {
+    padding: 2rem 0.5rem;
+  }
+  .hero h1 {
+    font-size: 2rem;
+  }
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}

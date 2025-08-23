@@ -1,0 +1,25 @@
+<div class="container" style="max-width:500px;margin:3rem auto;">
+  <div class="card">
+    <h2 style="text-align:center;margin-bottom:1.5rem;">Promote User</h2>
+    
+    <div style="background:var(--bg);padding:1rem;border-radius:var(--radius);margin-bottom:1.5rem;">
+      <h3 style="margin:0 0 0.5rem 0;"><%= targetUser.name %></h3>
+      <p style="margin:0;color:var(--muted);"><%= targetUser.email %></p>
+      <p style="margin:0.5rem 0 0 0;"><strong>Current Role:</strong> <span style="color:var(--accent);"><%= targetUser.role %></span></p>
+    </div>
+    
+    <form action="/auth/promote/<%= targetUser._id %>" method="POST">
+      <label style="margin-bottom:0.5rem;display:block;"><strong>New Role:</strong></label>
+      <select name="role" required>
+        <option value="user" <%= targetUser.role === 'user' ? 'selected' : '' %>>User</option>
+        <option value="organizer" <%= targetUser.role === 'organizer' ? 'selected' : '' %>>Organizer</option>
+        <option value="admin" <%= targetUser.role === 'admin' ? 'selected' : '' %>>Admin</option>
+      </select>
+      
+      <div style="display:flex;gap:1rem;margin-top:1.5rem;">
+        <button class="btn" type="submit" style="flex:1;">Update Role</button>
+        <a href="/dashboard" class="btn" style="flex:1;text-align:center;background:var(--muted);">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>

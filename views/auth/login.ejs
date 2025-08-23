@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Eventify</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="/images/favicon.ico">
+</head>
+<body>
+  <div class="container" style="max-width:400px;margin:3rem auto;">
+    <div class="card">
+      <h2 style="text-align:center;margin-bottom:1.5rem;">Login to Eventify</h2>
+      <form action="/auth/login" method="POST">
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button class="btn" type="submit" style="width:100%;margin-top:1rem;">Login</button>
+      </form>
+      <p style="text-align:center;margin-top:1rem;">Don't have an account? <a href="/auth/register" style="color:var(--primary);">Register</a></p>
+    </div>
+  </div>
+</body>
+</html>

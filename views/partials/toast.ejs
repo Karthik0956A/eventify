@@ -1,0 +1,6 @@
+<% if (success && success.length) { %>
+  <div class="toast show" id="toast-success"><%= success[0] %></div>
+<% } %>
+<% if (error && error.length) { %>
+  <div class="toast show" style="background: #dc2626;" id="toast-error"><%= error[0] %></div>
+<% } %>

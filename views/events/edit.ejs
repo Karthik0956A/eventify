@@ -1,0 +1,18 @@
+<div class="container" style="max-width:600px;margin:2rem auto;">
+  <div class="card">
+    <h2 style="text-align:center;margin-bottom:1.5rem;">Edit Event</h2>
+    <form action="/events/<%= event ? event._id : '' %>" method="POST" enctype="multipart/form-data">
+      <input type="text" name="title" placeholder="Event Title" value="<%= event ? event.title : '' %>" required>
+      <textarea name="description" placeholder="Description" rows="4" required><%= event ? event.description : '' %></textarea>
+      <input type="text" name="location" placeholder="Location" value="<%= event ? event.location : '' %>" required>
+      <input type="date" name="date" value="<%= event ? event.date : '' %>" required>
+      <input type="time" name="time" value="<%= event ? event.time : '' %>" required>
+      <input type="text" name="category" placeholder="Category" value="<%= event ? event.category : '' %>" required>
+      <input type="number" name="price" placeholder="Price (USD)" min="0" step="0.01" value="<%= event ? event.price : '' %>">
+      <input type="number" name="capacity" placeholder="Capacity" min="1" value="<%= event ? event.capacity : '' %>" required>
+      <label style="margin-bottom:0.5rem;display:block;">Banner Image (leave blank to keep current)</label>
+      <input type="file" name="banner" accept="image/*">
+      <button class="btn" type="submit" style="width:100%;margin-top:1rem;">Update Event</button>
+    </form>
+  </div>
+</div>

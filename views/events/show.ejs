@@ -1,0 +1,95 @@
+<div class="container" style="max-width:700px;margin:2rem auto;">
+  <div class="card">
+    <% if (event && event.bannerUrl) { %>
+      <img src="<%= event.bannerUrl %>" alt="Event Banner" style="width:100%;border-radius:var(--radius);margin-bottom:1rem;max-height:240px;object-fit:cover;">
+    <% } %>
+    <h2 style="margin-bottom:0.5rem;"><%= event ? event.title : 'Event Title' %></h2>
+    <p style="color:var(--muted);margin-bottom:1rem;">
+      <%= event ? event.location : '' %> &middot; <%= event ? event.date : '' %> <%= event ? event.time : '' %>
+    </p>
+    <p style="margin-bottom:1.5rem;"><%= event ? event.description : '' %></p>
+    <div style="display:flex;gap:2rem;align-items:center;margin-bottom:1rem;">
+      <div><strong>Price:</strong> $<%= event ? event.price : '0' %></div>
+      <div><strong>Capacity:</strong> <%= event ? event.capacity : '0' %></div>
+      <div><strong>Remaining Seats:</strong> <%= event ? event.remainingSeats : '0' %></div>
+    </div>
+    
+    <% if (user) { %>
+      <% 
+        // Check if user has RSVP'd for this event
+        let userRSVP = null;
+        if (typeof userRSVPs !== 'undefined' && userRSVPs) {
+          userRSVP = userRSVPs.find(rsvp => String(rsvp.eventId) === String(event._id));
+        }
+      %>
+      
+      <% if (userRSVP) { %>
+        <div style="background:var(--bg);padding:1rem;border-radius:var(--radius);margin-bottom:1rem;border:1px solid var(--border);">
+          <% if (userRSVP.paymentStatus === 'paid') { %>
+            <div style="color:var(--primary);font-weight:600;margin-bottom:0.5rem;">✅ You are registered for this event!</div>
+            <p style="margin:0;color:var(--muted);">Your payment has been confirmed. See you at the event!</p>
+          <% } else if (userRSVP.paymentStatus === 'pending') { %>
+            <div style="color:var(--accent);font-weight:600;margin-bottom:0.5rem;">⏳ Payment Pending</div>
+            <p style="margin:0;color:var(--muted);">Please complete your payment to confirm your registration.</p>
+            <form action="/payments/create-checkout-session" method="POST" style="margin-top:0.5rem;">
+              <input type="hidden" name="eventId" value="<%= event._id %>">
+              <button class="btn btn-accent" type="submit">Complete Payment</button>
+            </form>
+          <% } %>
+        </div>
+      <% } else if (event.remainingSeats > 0) { %>
+        <div style="background:var(--bg);padding:1rem;border-radius:var(--radius);margin-bottom:1rem;border:1px solid var(--border);">
+          <div style="color:var(--primary);font-weight:600;margin-bottom:0.5rem;">🎫 Register for this event</div>
+          <% if (event.price > 0) { %>
+            <p style="margin:0 0 0.5rem 0;color:var(--muted);">Click below to pay and register for $<%= event.price %></p>
+            <form action="/payments/create-checkout-session" method="POST" style="margin:0;">
+              <input type="hidden" name="eventId" value="<%= event._id %>">
+              <button class="btn btn-accent" type="submit">Pay & Register</button>
+            </form>
+          <% } else { %>
+            <p style="margin:0 0 0.5rem 0;color:var(--muted);">This is a free event. Click below to register.</p>
+            <form action="/events/<%= event._id %>/rsvp" method="POST" style="margin:0;">
+              <button class="btn btn-accent" type="submit">RSVP (Free)</button>
+            </form>
+          <% } %>
+        </div>
+      <% } else { %>
+        <div style="background:var(--bg);padding:1rem;border-radius:var(--radius);margin-bottom:1rem;border:1px solid var(--border);">
+          <div style="color:var(--muted);font-weight:600;">❌ Event is full</div>
+          <p style="margin:0;color:var(--muted);">No more seats available for this event.</p>
+        </div>
+      <% } %>
+    <% } else { %>
+      <div style="background:var(--bg);padding:1rem;border-radius:var(--radius);margin-bottom:1rem;border:1px solid var(--border);">
+        <div style="color:var(--muted);font-weight:600;">🔐 Login Required</div>
+        <p style="margin:0;color:var(--muted);">Please login to register for this event.</p>
+        <a href="/auth/login" class="btn btn-accent" style="margin-top:0.5rem;">Login to RSVP</a>
+      </div>
+    <% } %>
+    
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+      <a href="/events" class="btn" style="background:var(--muted);">← Back to Events</a>
+      
+      <% if (user && (String(event.createdBy) === user._id || user.role === 'admin')) { %>
+        <a href="/events/<%= event._id %>/edit" class="btn" style="background:var(--accent);">Edit Event</a>
+        <form action="/events/<%= event._id %>/delete" method="POST" style="margin:0;display:inline;">
+          <button class="btn" type="submit" style="background:#dc2626;" onclick="return confirm('Are you sure you want to delete this event?')">Delete Event</button>
+        </form>
+      <% } %>
+    </div>
+  </div>
+  
+  <% if (user) { %>
+    <div class="card" style="margin-top:2rem;">
+      <h3>Event Chat</h3>
+      <div id="chat-box" style="height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);padding:0.5rem;margin-bottom:1rem;background:#f8fafc;"></div>
+      <form id="chat-form" data-event-id="<%= event._id %>" style="display:flex;gap:0.5rem;">
+        <input id="chat-input" type="text" placeholder="Type a message..." style="flex:1;">
+        <button class="btn" type="submit">Send</button>
+      </form>
+    </div>
+    <script>window.currentUser = { name: '<%= user.name %>' };</script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/chat.js"></script>
+  <% } %>
+</div>

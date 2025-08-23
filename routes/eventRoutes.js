@@ -17,6 +17,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
   fileFilter: function (req, file, cb) {
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
@@ -28,14 +31,31 @@ const upload = multer({
 
 // Public routes
 router.get('/', eventController.listEvents);
+
+// Event management - these must come before /:id routes
+router.get('/new', isAuthenticated, eventController.getNewEvent);
+router.post('/', isAuthenticated, (req, res, next) => {
+  upload.single('banner')(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        req.flash('error', 'File too large. Maximum size is 5MB.');
+      } else {
+        req.flash('error', 'File upload error: ' + err.message);
+      }
+      return res.redirect('/events/new');
+    } else if (err) {
+      req.flash('error', err.message);
+      return res.redirect('/events/new');
+    }
+    next();
+  });
+}, eventController.createEvent);
+
+// Public routes that need to come after /new
 router.get('/:id', eventController.showEvent);
 
 // Protected routes
 router.use(isAuthenticated);
-
-// Event management
-router.get('/new', eventController.getNewEvent);
-router.post('/', upload.single('banner'), eventController.createEvent);
 router.get('/:id/edit', eventController.getEditEvent);
 router.put('/:id', upload.single('banner'), eventController.updateEvent);
 router.delete('/:id', eventController.deleteEvent);

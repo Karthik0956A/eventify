@@ -33,30 +33,61 @@ exports.getNewEvent = (req, res) => {
 exports.createEvent = async (req, res) => {
   try {
     const { title, description, location, date, time, category, price, capacity } = req.body;
+    
+    // Validate required fields
+    if (!title || !description || !location || !date || !time || !category || !capacity) {
+      req.flash('error', 'All required fields must be filled.');
+      return res.redirect('/events/new');
+    }
+    
+    // Validate capacity is a positive number
+    if (isNaN(capacity) || capacity <= 0) {
+      req.flash('error', 'Capacity must be a positive number.');
+      return res.redirect('/events/new');
+    }
+    
+    // Validate price if provided
+    if (price && (isNaN(price) || price < 0)) {
+      req.flash('error', 'Price must be a non-negative number.');
+      return res.redirect('/events/new');
+    }
+    
     let bannerUrl = '';
     if (req.file) {
       bannerUrl = '/images/' + req.file.filename;
     }
+    
     const event = new Event({
-      title,
-      description,
-      location,
+      title: title.trim(),
+      description: description.trim(),
+      location: location.trim(),
       date,
       time,
-      category,
-      price: price || 0,
-      capacity,
-      remainingSeats: capacity,
+      category: category.trim(),
+      price: price ? parseFloat(price) : 0,
+      capacity: parseInt(capacity),
+      remainingSeats: parseInt(capacity),
       createdBy: req.session.user._id,
       bannerUrl,
       status: 'pending' // Events start as pending
     });
+    
     await event.save();
     req.flash('success', 'Event created successfully! It will be reviewed by an admin before going live.');
     res.redirect('/events');
   } catch (err) {
     console.error('Event creation error:', err);
-    req.flash('error', 'Could not create event.');
+    
+    // Handle specific validation errors
+    if (err.name === 'ValidationError') {
+      const errorMessages = Object.values(err.errors).map(error => error.message).join(', ');
+      req.flash('error', `Validation error: ${errorMessages}`);
+    } else if (err.code === 11000) {
+      req.flash('error', 'An event with this title already exists.');
+    } else {
+      req.flash('error', 'Could not create event. Please try again.');
+    }
+    
     res.redirect('/events/new');
   }
 };

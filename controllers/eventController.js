@@ -1,6 +1,9 @@
 const Event = require('../models/Event');
 const RSVP = require('../models/RSVP');
 const User = require('../models/User');
+const { sendQRCodeEmail } = require('../utils/email');
+const { createNotification } = require('../controllers/notificationController');
+const QRCode = require('qrcode');
 const path = require('path');
 
 exports.listEvents = async (req, res) => {
@@ -213,7 +216,7 @@ exports.rsvpEvent = async (req, res) => {
       }
       
       // Create RSVP and mark as paid (since it's free)
-      await RSVP.create({ 
+      const rsvp = await RSVP.create({ 
         userId: req.session.user._id, 
         eventId: event._id, 
         paymentStatus: 'paid' 
@@ -223,7 +226,76 @@ exports.rsvpEvent = async (req, res) => {
       event.remainingSeats -= 1;
       await event.save();
       
-      req.flash('success', 'RSVP confirmed! You are registered for this free event.');
+      // Get user details for email
+      const user = await User.findById(req.session.user._id);
+      if (!user) {
+        req.flash('error', 'User not found');
+        return res.redirect('/events/' + event._id);
+      }
+      
+      const organizer = await User.findById(event.createdBy);
+      if (!organizer) {
+        req.flash('error', 'Event organizer not found');
+        return res.redirect('/events/' + event._id);
+      }
+      
+      // Generate QR code for the RSVP
+      const qrCodeData = JSON.stringify({
+        rsvpId: rsvp._id.toString(),
+        userId: user._id.toString(),
+        eventId: event._id.toString(),
+        eventTitle: event.title
+      });
+
+      let qrCodeDataUrl;
+      try {
+        qrCodeDataUrl = await QRCode.toDataURL(qrCodeData);
+      } catch (qrError) {
+        console.error('QR code generation error:', qrError);
+        qrCodeDataUrl = null;
+      }
+
+      // Send QR code email
+      if (qrCodeDataUrl) {
+        try {
+          await sendQRCodeEmail(
+            user.email,
+            user.name,
+            event.title,
+            event.date,
+            event.location,
+            qrCodeDataUrl
+          );
+        } catch (qrEmailErr) {
+          console.error('QR code email failed:', qrEmailErr);
+        }
+      }
+
+      // Create notifications
+      try {
+        // Notification for user
+        await createNotification(
+          user._id,
+          'Registration Successful',
+          `Registration successful for ${event.title}`,
+          'registration',
+          event._id
+        );
+
+        // Notification for organizer
+        await createNotification(
+          organizer._id,
+          'New Registration',
+          `${user.name} registered for ${event.title}`,
+          'registration',
+          event._id,
+          user._id
+        );
+      } catch (notificationErr) {
+        console.error('Notification creation failed:', notificationErr);
+      }
+      
+      req.flash('success', 'RSVP confirmed! You are registered for this free event. Check your email for the QR code.');
       res.redirect('/events/' + event._id);
     } else {
       // For paid events, redirect to payment

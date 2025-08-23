@@ -7,6 +7,13 @@ const { generateQR } = require('../utils/qr');
 exports.index = async (req, res) => {
   try {
     const user = req.session.user;
+    
+    // Check if user is authenticated
+    if (!user) {
+      req.flash('error', 'Please login to access the dashboard.');
+      return res.redirect('/auth/login');
+    }
+    
     let registeredEvents = [];
     let createdEvents = [];
     let allUsers = [];
@@ -17,17 +24,32 @@ exports.index = async (req, res) => {
     
     if (user.role === 'user') {
       const rsvps = await RSVP.find({ userId: user._id, paymentStatus: 'paid' }).populate('eventId');
-      registeredEvents = rsvps.map(r => r.eventId);
+      registeredEvents = rsvps.map(r => r.eventId).filter(Boolean); // Filter out null events
+      
+      // Generate QR codes for valid RSVPs
       for (const rsvp of rsvps) {
-        qrCodes[rsvp.eventId._id] = await generateQR(rsvp._id.toString());
+        if (rsvp.eventId && rsvp.eventId._id) {
+          try {
+            qrCodes[rsvp.eventId._id] = await generateQR(rsvp._id.toString());
+          } catch (qrError) {
+            console.error('QR generation error for RSVP:', rsvp._id, qrError);
+            qrCodes[rsvp.eventId._id] = null;
+          }
+        }
       }
+      
       analytics.rsvps = rsvps.length;
       analytics.payments = await Payment.countDocuments({ userId: user._id, status: 'paid' });
       analytics.attendance = 0; // Placeholder
     } else if (user.role === 'organizer') {
       createdEvents = await Event.find({ createdBy: user._id });
-      analytics.rsvps = await RSVP.countDocuments({ eventId: { $in: createdEvents.map(e => e._id) } });
-      analytics.payments = await Payment.countDocuments({ eventId: { $in: createdEvents.map(e => e._id) }, status: 'paid' });
+      const eventIds = createdEvents.map(e => e._id);
+      
+      if (eventIds.length > 0) {
+        analytics.rsvps = await RSVP.countDocuments({ eventId: { $in: eventIds } });
+        analytics.payments = await Payment.countDocuments({ eventId: { $in: eventIds }, status: 'paid' });
+      }
+      
       analytics.attendance = 0; // Placeholder
       analytics.pending = await Event.countDocuments({ createdBy: user._id, status: 'pending' });
     } else if (user.role === 'admin') {
@@ -53,9 +75,17 @@ exports.index = async (req, res) => {
     });
   } catch (err) {
     console.error('Dashboard error:', err);
+    
+    // If there's a session error, redirect to login
+    if (err.message && err.message.includes('Cannot read properties of null')) {
+      req.flash('error', 'Session expired. Please login again.');
+      return res.redirect('/auth/login');
+    }
+    
+    // Otherwise, render dashboard with empty data
     res.render('dashboard/index', { 
       title: 'Dashboard', 
-      user: req.session.user, 
+      user: req.session.user || null, 
       registeredEvents: [], 
       createdEvents: [], 
       allUsers: [], 

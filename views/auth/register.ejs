@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" href="/images/favicon.ico">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="/js/toast.js"></script>
 </head>
 <body style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;">
   <div class="container" style="max-width:500px;margin:2rem;">
@@ -17,7 +18,7 @@
         <p style="color:var(--muted);margin:0;">Create your account and start exploring events</p>
       </div>
       
-      <form action="/auth/register" method="POST">
+      <form action="/auth/register" method="POST" id="registerForm">
         <div style="margin-bottom:1rem;">
           <label for="name" style="display:block;text-align:left;font-weight:600;margin-bottom:0.5rem;">Full Name</label>
           <input type="text" id="name" name="name" required 
@@ -88,26 +89,108 @@
   </div>
 
   <script>
-  // Password confirmation validation
+  // Handle form submission and validation
   document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form[action="/auth/register"]');
+    const form = document.getElementById('registerForm');
     const password = document.getElementById('password');
     const confirmPassword = document.getElementById('confirmPassword');
+    const age = document.getElementById('age');
 
     form.addEventListener('submit', function(e) {
-      if (password.value !== confirmPassword.value) {
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const ageValue = age.value;
+      const gender = document.getElementById('gender').value;
+      const passwordValue = password.value;
+      const confirmPasswordValue = confirmPassword.value;
+
+      // Validate required fields
+      if (!name || !email || !passwordValue || !confirmPasswordValue) {
         e.preventDefault();
-        alert('Passwords do not match!');
+        showError('Please fill in all required fields');
         return false;
       }
 
-      if (password.value.length < 6) {
+      // Validate name
+      if (name.length < 2) {
         e.preventDefault();
-        alert('Password must be at least 6 characters long!');
+        showError('Name must be at least 2 characters long');
+        return false;
+      }
+
+      // Validate email
+      if (!email.includes('@') || !email.includes('.')) {
+        e.preventDefault();
+        showError('Please enter a valid email address');
+        return false;
+      }
+
+      // Validate phone (if provided)
+      if (phone && !/^[\+]?[1-9][\d]{0,15}$/.test(phone.replace(/\s/g, ''))) {
+        e.preventDefault();
+        showError('Please enter a valid phone number');
+        return false;
+      }
+
+      // Validate age (if provided)
+      if (ageValue && (ageValue < 13 || ageValue > 120)) {
+        e.preventDefault();
+        showError('Age must be between 13 and 120');
+        return false;
+      }
+
+      // Validate password
+      if (passwordValue.length < 6) {
+        e.preventDefault();
+        showError('Password must be at least 6 characters long');
+        return false;
+      }
+
+      // Validate password confirmation
+      if (passwordValue !== confirmPasswordValue) {
+        e.preventDefault();
+        showError('Passwords do not match');
         return false;
       }
     });
   });
+
+  // Show error toast
+  function showError(message) {
+    if (typeof showToast !== 'undefined') {
+      showToast(message, 'error');
+    } else if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'error',
+        title: message,
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
+    } else {
+      alert(message);
+    }
+  }
+
+  // Show success toast
+  function showSuccess(message) {
+    if (typeof showToast !== 'undefined') {
+      showToast(message, 'success');
+    } else if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: message,
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
+    }
+  }
   </script>
 </body>
 </html>

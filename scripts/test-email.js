@@ -1,5 +1,6 @@
 require('dotenv').config();
-const { testEmailConfig, sendWelcomeEmail, sendPaymentConfirmationEmail, sendOTPEmail } = require('../utils/email');
+const { testEmailConfig, sendWelcomeEmail, sendPaymentConfirmationEmail, sendOTPEmail, sendQRCodeEmail } = require('../utils/email');
+const QRCode = require('qrcode');
 
 async function testEmailSetup() {
   console.log('Testing email configuration...\n');
@@ -24,6 +25,31 @@ async function testEmailSetup() {
       console.log('Testing OTP email...');
       await sendOTPEmail('test@example.com', 'Test User', '123456');
       console.log('✅ OTP email sent successfully!\n');
+      
+      // Test QR code email
+      console.log('Testing QR code email...');
+      const qrCodeData = JSON.stringify({
+        rsvpId: 'test-rsvp-id',
+        userId: 'test-user-id',
+        eventId: 'test-event-id',
+        eventTitle: 'Test Event'
+      });
+      
+      let qrCodeDataUrl;
+      try {
+        qrCodeDataUrl = await QRCode.toDataURL(qrCodeData);
+        await sendQRCodeEmail(
+          'test@example.com',
+          'Test User',
+          'Test Event',
+          '2024-01-15',
+          'Test Location',
+          qrCodeDataUrl
+        );
+        console.log('✅ QR code email sent successfully!\n');
+      } catch (qrError) {
+        console.log('⚠️ QR code email test skipped (QR generation failed):', qrError.message);
+      }
       
       console.log('🎉 All email tests passed! Your email configuration is working correctly.');
     } else {

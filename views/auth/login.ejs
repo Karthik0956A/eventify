@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" href="/images/favicon.ico">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="/js/toast.js"></script>
 </head>
 <body style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;">
   <div class="container" style="max-width:400px;margin:2rem;">
@@ -17,7 +18,7 @@
         <p style="color:var(--muted);margin:0;">Login to your Eventify account</p>
       </div>
       
-      <form action="/auth/login" method="POST">
+      <form action="/auth/login" method="POST" id="loginForm">
         <div style="margin-bottom:1rem;">
           <label for="email" style="display:block;text-align:left;font-weight:600;margin-bottom:0.5rem;">Email Address</label>
           <input type="email" id="email" name="email" required 
@@ -48,5 +49,71 @@
       </div>
     </div>
   </div>
+
+  <script>
+  // Handle form submission and show appropriate messages
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('loginForm');
+    
+    form.addEventListener('submit', function(e) {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      if (!email || !password) {
+        e.preventDefault();
+        showError('Please fill in all fields');
+        return false;
+      }
+      
+      if (!email.includes('@')) {
+        e.preventDefault();
+        showError('Please enter a valid email address');
+        return false;
+      }
+      
+      if (password.length < 6) {
+        e.preventDefault();
+        showError('Password must be at least 6 characters long');
+        return false;
+      }
+    });
+  });
+
+  // Show error toast
+  function showError(message) {
+    if (typeof showToast !== 'undefined') {
+      showToast(message, 'error');
+    } else if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'error',
+        title: message,
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
+    } else {
+      alert(message);
+    }
+  }
+
+  // Show success toast
+  function showSuccess(message) {
+    if (typeof showToast !== 'undefined') {
+      showToast(message, 'success');
+    } else if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: message,
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
+    }
+  }
+  </script>
 </body>
 </html>

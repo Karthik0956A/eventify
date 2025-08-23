@@ -3,8 +3,9 @@ const Event = require('../models/Event');
 const RSVP = require('../models/RSVP');
 const Payment = require('../models/Payment');
 const User = require('../models/User');
-const { sendPaymentConfirmationEmail } = require('../utils/email');
+const { sendPaymentConfirmationEmail, sendQRCodeEmail } = require('../utils/email');
 const { createNotification } = require('../controllers/notificationController');
+const QRCode = require('qrcode');
 
 exports.createCheckoutSession = async (req, res) => {
   try {
@@ -120,8 +121,22 @@ exports.paymentSuccess = async (req, res) => {
 
     // Get event and user details
     const event = await Event.findById(eventId);
+    if (!event) {
+      req.flash('error', 'Event not found');
+      return res.redirect('/events');
+    }
+    
     const user = await User.findById(req.session.user._id);
+    if (!user) {
+      req.flash('error', 'User not found');
+      return res.redirect('/events');
+    }
+    
     const organizer = await User.findById(event.createdBy);
+    if (!organizer) {
+      req.flash('error', 'Event organizer not found');
+      return res.redirect('/events');
+    }
 
     // Update wallet balances
     const organizerAmount = event.price * 0.9; // 90% to organizer
@@ -138,6 +153,22 @@ exports.paymentSuccess = async (req, res) => {
       await adminUser.save();
     }
 
+    // Generate QR code for the RSVP
+    const qrCodeData = JSON.stringify({
+      rsvpId: rsvp._id.toString(),
+      userId: user._id.toString(),
+      eventId: event._id.toString(),
+      eventTitle: event.title
+    });
+
+    let qrCodeDataUrl;
+    try {
+      qrCodeDataUrl = await QRCode.toDataURL(qrCodeData);
+    } catch (qrError) {
+      console.error('QR code generation error:', qrError);
+      qrCodeDataUrl = null;
+    }
+
     // Send payment confirmation email
     try {
       await sendPaymentConfirmationEmail(
@@ -149,6 +180,22 @@ exports.paymentSuccess = async (req, res) => {
       );
     } catch (emailErr) {
       console.error('Payment confirmation email failed:', emailErr);
+    }
+
+    // Send QR code email
+    if (qrCodeDataUrl) {
+      try {
+        await sendQRCodeEmail(
+          user.email,
+          user.name,
+          event.title,
+          event.date,
+          event.location,
+          qrCodeDataUrl
+        );
+      } catch (qrEmailErr) {
+        console.error('QR code email failed:', qrEmailErr);
+      }
     }
 
     // Create notifications
@@ -175,7 +222,7 @@ exports.paymentSuccess = async (req, res) => {
       console.error('Notification creation failed:', notificationErr);
     }
 
-    req.flash('success', 'Payment successful! You are registered for the event.');
+    req.flash('success', 'Payment successful! You are registered for the event. Check your email for the QR code.');
     res.redirect('/dashboard');
   } catch (err) {
     console.error('Payment success error:', err);

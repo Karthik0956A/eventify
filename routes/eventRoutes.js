@@ -3,29 +3,53 @@ const router = express.Router();
 const eventController = require('../controllers/eventController');
 const { isAuthenticated, hasRole } = require('../middleware/auth');
 const multer = require('multer');
-const upload = multer({ dest: 'public/images/' });
+const path = require('path');
 
-// List events (only show approved events to public)
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/images/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: function (req, file, cb) {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'), false);
+    }
+  }
+});
+
+// Public routes
 router.get('/', eventController.listEvents);
-// New event form (allow all authenticated users)
-router.get('/new', isAuthenticated, eventController.getNewEvent);
-// Create event (allow all authenticated users)
-router.post('/', isAuthenticated, upload.single('banner'), eventController.createEvent);
-// Show event details
 router.get('/:id', eventController.showEvent);
-// Edit event form (only creator or admin)
-router.get('/:id/edit', isAuthenticated, eventController.getEditEvent);
-// Update event (only creator or admin)
-router.post('/:id', isAuthenticated, upload.single('banner'), eventController.updateEvent);
-// Delete event (only creator or admin)
-router.post('/:id/delete', isAuthenticated, eventController.deleteEvent);
-// RSVP (only for approved events)
-router.post('/:id/rsvp', isAuthenticated, eventController.rsvpEvent);
 
-// Admin approval routes
-router.get('/admin/pending', isAuthenticated, hasRole('admin'), eventController.getPendingEvents);
-router.post('/admin/approve/:id', isAuthenticated, hasRole('admin'), eventController.approveEvent);
-router.post('/admin/reject/:id', isAuthenticated, hasRole('admin'), eventController.rejectEvent);
-router.post('/admin/approve-all', isAuthenticated, hasRole('admin'), eventController.approveAllEvents);
+// Protected routes
+router.use(isAuthenticated);
+
+// Event management
+router.get('/new', eventController.getNewEvent);
+router.post('/', upload.single('banner'), eventController.createEvent);
+router.get('/:id/edit', eventController.getEditEvent);
+router.put('/:id', upload.single('banner'), eventController.updateEvent);
+router.delete('/:id', eventController.deleteEvent);
+
+// RSVP
+router.post('/:id/rsvp', eventController.rsvpEvent);
+
+// Event details with registrations (for event creators)
+router.get('/:id/details', eventController.showEventDetails);
+
+// Admin routes
+router.get('/admin/pending', hasRole('admin'), eventController.getPendingEvents);
+router.post('/admin/:id/approve', hasRole('admin'), eventController.approveEvent);
+router.post('/admin/:id/reject', hasRole('admin'), eventController.rejectEvent);
+router.post('/admin/approve-all', hasRole('admin'), eventController.approveAllEvents);
 
 module.exports = router;

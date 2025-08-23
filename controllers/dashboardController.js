@@ -53,14 +53,24 @@ exports.index = async (req, res) => {
       analytics.attendance = 0; // Placeholder
       analytics.pending = await Event.countDocuments({ createdBy: user._id, status: 'pending' });
     } else if (user.role === 'admin') {
+      // Admin can see all users and all approved events
       allUsers = await User.find();
-      allEvents = await Event.find();
-      pendingEvents = await Event.find({ status: 'pending' }).populate('createdBy', 'name email');
+      allEvents = await Event.find({ status: 'approved' }); // Only show approved events
+      
+      // Only show pending events created by other users
+      pendingEvents = await Event.find({ 
+        status: 'pending',
+        createdBy: { $ne: user._id } // Not created by current admin
+      }).populate('createdBy', 'name email');
+      
       analytics.rsvps = await RSVP.countDocuments();
       analytics.payments = await Payment.countDocuments({ status: 'paid' });
       analytics.attendance = 0; // Placeholder
       analytics.pending = pendingEvents.length;
     }
+    
+    // Get created events for all users (including regular users)
+    createdEvents = await Event.find({ createdBy: user._id });
     
     res.render('dashboard/index', {
       title: 'Dashboard',

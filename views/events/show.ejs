@@ -71,7 +71,7 @@
     <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
       <a href="/events" class="btn" style="background:var(--muted);">← Back to Events</a>
       
-      <% if (user && (String(event.createdBy) === user._id || user.role === 'admin')) { %>
+      <% if (user && String(event.createdBy) === user._id) { %>
         <a href="/events/<%= event._id %>/edit" class="btn" style="background:var(--accent);">Edit Event</a>
         <form action="/events/<%= event._id %>/delete" method="POST" style="margin:0;display:inline;">
           <button class="btn" type="submit" style="background:#dc2626;" onclick="return confirm('Are you sure you want to delete this event?')">Delete Event</button>

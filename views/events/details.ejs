@@ -1,0 +1,100 @@
+<div class="container" style="max-width:1000px;margin:2rem auto;">
+  <div class="card" style="margin-bottom:2rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <h1 style="margin:0;color:var(--primary);">Event Details</h1>
+      <a href="/dashboard" class="btn" style="background:var(--muted);">← Back to Dashboard</a>
+    </div>
+    
+    <% if (event && event.bannerUrl) { %>
+      <img src="<%= event.bannerUrl %>" alt="Event Banner" style="width:100%;border-radius:var(--radius);margin-bottom:1rem;max-height:300px;object-fit:cover;">
+    <% } %>
+    
+    <h2 style="margin-bottom:0.5rem;"><%= event ? event.title : 'Event Title' %></h2>
+    <p style="color:var(--muted);margin-bottom:1rem;">
+      📍 <%= event ? event.location : '' %> &middot; 📅 <%= event ? event.date : '' %> &middot; 🕐 <%= event ? event.time : '' %>
+    </p>
+    
+    <p style="margin-bottom:1.5rem;line-height:1.6;"><%= event ? event.description : '' %></p>
+    
+    <div style="display:flex;gap:2rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
+      <div><strong>Price:</strong> $<%= event ? event.price : '0' %></div>
+      <div><strong>Category:</strong> <%= event ? event.category : '' %></div>
+      <div><strong>Capacity:</strong> <%= event ? event.capacity : '0' %></div>
+      <div><strong>Remaining Seats:</strong> <%= event ? event.remainingSeats : '0' %></div>
+      <div><strong>Status:</strong> 
+        <span style="background:<%= event && event.status === 'approved' ? 'var(--success)' : 'var(--warning)' %>;color:white;padding:0.25rem 0.5rem;border-radius:var(--radius);font-size:0.75rem;">
+          <%= event ? event.status : '' %>
+        </span>
+      </div>
+    </div>
+    
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+      <a href="/events/<%= event._id %>/edit" class="btn" style="background:var(--accent);">Edit Event</a>
+      <a href="/events/<%= event._id %>" class="btn btn-accent">View Public Page</a>
+    </div>
+  </div>
+  
+  <!-- Registrations Section -->
+  <div class="card">
+    <h3 style="margin-bottom:1rem;color:var(--primary);">📋 Event Registrations (<%= registrations ? registrations.length : 0 %>)</h3>
+    
+    <% if (registrations && registrations.length > 0) { %>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;margin-top:1rem;">
+          <thead>
+            <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
+              <th style="padding:1rem;text-align:left;font-weight:600;color:var(--primary);">Name</th>
+              <th style="padding:1rem;text-align:left;font-weight:600;color:var(--primary);">Email</th>
+              <th style="padding:1rem;text-align:left;font-weight:600;color:var(--primary);">Phone</th>
+              <th style="padding:1rem;text-align:left;font-weight:600;color:var(--primary);">Age</th>
+              <th style="padding:1rem;text-align:left;font-weight:600;color:var(--primary);">Gender</th>
+              <th style="padding:1rem;text-align:left;font-weight:600;color:var(--primary);">Registration Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% registrations.forEach(registration => { %>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:1rem;">
+                  <div style="font-weight:600;color:var(--primary);"><%= registration.userId ? registration.userId.name : 'N/A' %></div>
+                </td>
+                <td style="padding:1rem;">
+                  <a href="mailto:<%= registration.userId ? registration.userId.email : '' %>" style="color:var(--accent);text-decoration:none;">
+                    <%= registration.userId ? registration.userId.email : 'N/A' %>
+                  </a>
+                </td>
+                <td style="padding:1rem;">
+                  <%= registration.userId && registration.userId.phone ? registration.userId.phone : 'N/A' %>
+                </td>
+                <td style="padding:1rem;">
+                  <%= registration.userId && registration.userId.age ? registration.userId.age : 'N/A' %>
+                </td>
+                <td style="padding:1rem;">
+                  <%= registration.userId && registration.userId.gender ? registration.userId.gender : 'N/A' %>
+                </td>
+                <td style="padding:1rem;color:var(--muted);font-size:0.875rem;">
+                  <%= new Date(registration.createdAt).toLocaleDateString() %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+      
+      <div style="margin-top:1.5rem;padding:1rem;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border);">
+        <h4 style="margin:0 0 0.5rem 0;color:var(--primary);">📊 Registration Summary</h4>
+        <div style="display:flex;gap:2rem;flex-wrap:wrap;">
+          <div><strong>Total Registrations:</strong> <%= registrations.length %></div>
+          <div><strong>Seats Filled:</strong> <%= event ? event.capacity - event.remainingSeats : 0 %></div>
+          <div><strong>Seats Available:</strong> <%= event ? event.remainingSeats : 0 %></div>
+          <div><strong>Fill Rate:</strong> <%= event ? Math.round(((event.capacity - event.remainingSeats) / event.capacity) * 100) : 0 %>%</div>
+        </div>
+      </div>
+    <% } else { %>
+      <div style="text-align:center;padding:3rem;color:var(--muted);">
+        <div style="font-size:3rem;margin-bottom:1rem;">📭</div>
+        <h4 style="margin:0 0 0.5rem 0;">No Registrations Yet</h4>
+        <p style="margin:0;">This event hasn't received any registrations yet.</p>
+      </div>
+    <% } %>
+  </div>
+</div>

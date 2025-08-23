@@ -11,83 +11,133 @@
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:2rem;">
     <% if (user.role === 'user') { %>
       <div class="card">
-        <h2>Your Registered Events</h2>
+        <h2 style="margin-bottom:1.5rem;color:var(--primary);display:flex;align-items:center;gap:0.5rem;">
+          <span style="font-size:1.5rem;">🎫</span>
+          Your Registered Events
+        </h2>
         <% if (registeredEvents && registeredEvents.length) { %>
-          <ul style="list-style:none;padding:0;">
+          <div style="display:grid;gap:1rem;">
             <% registeredEvents.forEach(ev => { %>
-              <li style="display:flex;align-items:center;gap:1rem;padding:0.5rem 0;border-bottom:1px solid var(--border);">
-                <a href="/events/<%= ev._id %>" style="color:var(--primary);text-decoration:none;flex:1;"><%= ev.title %></a>
-                <% if (qrCodes && qrCodes[ev._id]) { %>
-                  <img src="<%= qrCodes[ev._id] %>" alt="QR Code" style="width:48px;height:48px;">
-                <% } %>
-              </li>
+              <div style="background:var(--bg);padding:1rem;border-radius:var(--radius);border:1px solid var(--border);transition:all 0.2s ease;hover:shadow:0 2px 8px rgba(0,0,0,0.1);">
+                <div style="display:flex;align-items:center;gap:1rem;">
+                  <div style="flex:1;">
+                    <h4 style="margin:0 0 0.5rem 0;color:var(--primary);">
+                      <a href="/events/<%= ev._id %>" style="color:inherit;text-decoration:none;"><%= ev.title %></a>
+                    </h4>
+                    <p style="margin:0;color:var(--muted);font-size:0.875rem;">
+                      📍 <%= ev.location %> &middot; 📅 <%= ev.date %>
+                    </p>
+                  </div>
+                  <% if (qrCodes && qrCodes[ev._id]) { %>
+                    <div style="text-align:center;">
+                      <img src="<%= qrCodes[ev._id] %>" alt="QR Code" style="width:48px;height:48px;border-radius:4px;">
+                      <p style="margin:0.25rem 0 0 0;font-size:0.75rem;color:var(--muted);">QR Code</p>
+                    </div>
+                  <% } %>
+                </div>
+              </div>
             <% }) %>
-          </ul>
+          </div>
         <% } else { %>
-          <div style="color:var(--muted);text-align:center;padding:1rem;">
-            <p>No registered events yet.</p>
+          <div style="text-align:center;padding:2rem;color:var(--muted);">
+            <div style="font-size:3rem;margin-bottom:1rem;">📭</div>
+            <h4 style="margin:0 0 0.5rem 0;">No Registered Events</h4>
+            <p style="margin:0 0 1rem 0;">You haven't registered for any events yet.</p>
             <a href="/events" class="btn btn-accent">Browse Events</a>
           </div>
         <% } %>
       </div>
     <% } %>
     
-    <% if (user.role === 'organizer' || user.role === 'admin') { %>
-      <div class="card">
-        <h2>Your Created Events</h2>
-        <% if (createdEvents && createdEvents.length) { %>
-          <ul style="list-style:none;padding:0;">
-            <% createdEvents.forEach(ev => { %>
-              <li style="display:flex;align-items:center;gap:1rem;padding:0.5rem 0;border-bottom:1px solid var(--border);">
-                <a href="/events/<%= ev._id %>" style="color:var(--primary);text-decoration:none;flex:1;"><%= ev.title %></a>
-                <a href="/events/<%= ev._id %>/edit" class="btn" style="padding:0.25rem 0.5rem;font-size:0.875rem;">Edit</a>
-              </li>
-            <% }) %>
-          </ul>
-        <% } else { %>
-          <div style="color:var(--muted);text-align:center;padding:1rem;">
-            <p>No events created yet.</p>
-            <a href="/events/new" class="btn btn-accent">Create Your First Event</a>
-          </div>
-        <% } %>
-      </div>
-    <% } %>
+    <!-- Created Events Section - Show for all users -->
+    <div class="card">
+      <h2 style="margin-bottom:1.5rem;color:var(--primary);display:flex;align-items:center;gap:0.5rem;">
+        <span style="font-size:1.5rem;">🎪</span>
+        Your Created Events
+      </h2>
+      <% if (createdEvents && createdEvents.length) { %>
+        <div style="display:grid;gap:1rem;">
+          <% createdEvents.forEach(ev => { %>
+            <div style="background:var(--bg);padding:1rem;border-radius:var(--radius);border:1px solid var(--border);transition:all 0.2s ease;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;">
+                <div style="flex:1;">
+                  <h4 style="margin:0 0 0.5rem 0;color:var(--primary);">
+                    <a href="/events/<%= ev._id %>" style="color:inherit;text-decoration:none;"><%= ev.title %></a>
+                  </h4>
+                  <p style="margin:0;color:var(--muted);font-size:0.875rem;">
+                    📍 <%= ev.location %> &middot; 📅 <%= ev.date %> &middot; 
+                    <span style="background:<%= ev.status === 'approved' ? 'var(--success)' : 'var(--warning)' %>;color:white;padding:0.125rem 0.375rem;border-radius:var(--radius);font-size:0.75rem;">
+                      <%= ev.status %>
+                    </span>
+                  </p>
+                </div>
+                <div style="display:flex;gap:0.5rem;">
+                  <a href="/events/<%= ev._id %>/details" class="btn" style="padding:0.25rem 0.5rem;font-size:0.875rem;background:var(--primary);">Details</a>
+                  <a href="/events/<%= ev._id %>/edit" class="btn" style="padding:0.25rem 0.5rem;font-size:0.875rem;background:var(--accent);">Edit</a>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div style="text-align:center;padding:2rem;color:var(--muted);">
+          <div style="font-size:3rem;margin-bottom:1rem;">🎪</div>
+          <h4 style="margin:0 0 0.5rem 0;">No Events Created</h4>
+          <p style="margin:0 0 1rem 0;">Start creating amazing events for your community!</p>
+          <a href="/events/new" class="btn btn-accent">Create Your First Event</a>
+        </div>
+      <% } %>
+    </div>
     
     <% if (user.role === 'admin') { %>
       <div class="card">
-        <h2>All Users</h2>
-        <ul style="list-style:none;padding:0;">
-          <% allUsers.forEach(u => { %>
-            <li style="padding:0.5rem 0;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <h2 style="margin-bottom:1.5rem;color:var(--primary);display:flex;align-items:center;gap:0.5rem;">
+          <span style="font-size:1.5rem;">👥</span>
+          All Users
+        </h2>
+        <div style="display:grid;gap:0.5rem;">
+          <% allUsers.forEach(u =>  { if(u.email !== 'admin@eventify.com'){ %>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border);">
               <div>
-                <strong><%= u.name %></strong> (<%= u.email %>) - <span style="color:var(--accent);"><%= u.role %></span>
+                <strong style="color:var(--primary);"><%= u.name %></strong>
+                <span style="color:var(--muted);font-size:0.875rem;"> (<%= u.email %>)</span>
+                <span style="color:var(--accent);font-size:0.875rem;margin-left:0.5rem;">• <%= u.role %></span>
               </div>
               <a href="/auth/promote/<%= u._id %>" class="btn" style="padding:0.25rem 0.5rem;font-size:0.875rem;background:var(--accent);">Promote</a>
-            </li>
-          <% }) %>
-        </ul>
+            </div>
+          <% }}) %>
+        </div>
       </div>
       
       <div class="card">
-        <h2>Pending Events Review</h2>
+        <h2 style="margin-bottom:1.5rem;color:var(--primary);display:flex;align-items:center;gap:0.5rem;">
+          <span style="font-size:1.5rem;">⏳</span>
+          Pending Events Review
+        </h2>
         <p style="color:var(--muted);margin-bottom:1rem;">Review and approve events before they go live.</p>
         <a href="/events/admin/pending" class="btn btn-accent">Review Pending Events</a>
       </div>
       
       <div class="card">
-        <h2>All Events</h2>
-        <ul style="list-style:none;padding:0;">
+        <h2 style="margin-bottom:1.5rem;color:var(--primary);display:flex;align-items:center;gap:0.5rem;">
+          <span style="font-size:1.5rem;">📋</span>
+          All Events
+        </h2>
+        <div style="display:grid;gap:0.5rem;">
           <% allEvents.forEach(ev => { %>
-            <li style="padding:0.5rem 0;border-bottom:1px solid var(--border);">
-              <a href="/events/<%= ev._id %>" style="color:var(--primary);text-decoration:none;"><%= ev.title %></a>
-            </li>
+            <div style="padding:0.75rem;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border);">
+              <a href="/events/<%= ev._id %>" style="color:var(--primary);text-decoration:none;font-weight:500;"><%= ev.title %></a>
+            </div>
           <% }) %>
-        </ul>
+        </div>
       </div>
     <% } %>
     
     <div class="card">
-      <h2>Analytics</h2>
+      <h2 style="margin-bottom:1.5rem;color:var(--primary);display:flex;align-items:center;gap:0.5rem;">
+        <span style="font-size:1.5rem;">📊</span>
+        Analytics
+      </h2>
       <canvas id="analyticsChart" width="300" height="180"></canvas>
       <div style="color:var(--muted);margin-top:1rem;">
         <div style="display:flex;justify-content:space-around;text-align:center;">
@@ -115,12 +165,15 @@
     
     <% if (user.role === 'admin' && pendingEvents && pendingEvents.length) { %>
       <div class="card">
-        <h2>Recent Pending Events</h2>
+        <h2 style="margin-bottom:1.5rem;color:var(--primary);display:flex;align-items:center;gap:0.5rem;">
+          <span style="font-size:1.5rem;">⏳</span>
+          Recent Pending Events
+        </h2>
         <p style="color:var(--muted);margin-bottom:1rem;">Latest events awaiting approval</p>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;">
           <% pendingEvents.slice(0, 3).forEach(event => { %>
             <div style="background:var(--bg);padding:1rem;border-radius:var(--radius);border:1px solid var(--border);">
-              <h4 style="margin:0 0 0.5rem 0;"><%= event.title %></h4>
+              <h4 style="margin:0 0 0.5rem 0;color:var(--primary);"><%= event.title %></h4>
               <p style="margin:0 0 0.5rem 0;color:var(--muted);font-size:0.875rem;">By: <%= event.createdBy.name %></p>
               <p style="margin:0 0 0.5rem 0;color:var(--muted);font-size:0.875rem;"><%= event.date %> at <%= event.location %></p>
               <a href="/events/admin/pending" class="btn" style="padding:0.25rem 0.5rem;font-size:0.875rem;">Review</a>

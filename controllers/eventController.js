@@ -106,9 +106,9 @@ exports.getEditEvent = async (req, res) => {
       req.flash('error', 'Event not found.');
       return res.redirect('/events');
     }
-    // Only creator or admin can edit
-    if (String(event.createdBy) !== req.session.user._id && req.session.user.role !== 'admin') {
-      req.flash('error', 'Access denied.');
+    // Only creator can edit (admin can only edit their own events)
+    if (String(event.createdBy) !== req.session.user._id) {
+      req.flash('error', 'Access denied. You can only edit events you created.');
       return res.redirect('/events');
     }
     res.render('events/edit', { title: 'Edit Event', event, user: req.session.user });
@@ -125,9 +125,9 @@ exports.updateEvent = async (req, res) => {
       req.flash('error', 'Event not found.');
       return res.redirect('/events');
     }
-    // Only creator or admin can update
-    if (String(event.createdBy) !== req.session.user._id && req.session.user.role !== 'admin') {
-      req.flash('error', 'Access denied.');
+    // Only creator can update (admin can only update their own events)
+    if (String(event.createdBy) !== req.session.user._id) {
+      req.flash('error', 'Access denied. You can only update events you created.');
       return res.redirect('/events');
     }
     const { title, description, location, date, time, category, price, capacity } = req.body;
@@ -170,9 +170,9 @@ exports.deleteEvent = async (req, res) => {
       req.flash('error', 'Event not found.');
       return res.redirect('/events');
     }
-    // Only creator or admin can delete
-    if (String(event.createdBy) !== req.session.user._id && req.session.user.role !== 'admin') {
-      req.flash('error', 'Access denied.');
+    // Only creator can delete (admin can only delete their own events)
+    if (String(event.createdBy) !== req.session.user._id) {
+      req.flash('error', 'Access denied. You can only delete events you created.');
       return res.redirect('/events');
     }
     await event.deleteOne();
@@ -323,7 +323,11 @@ exports.rsvpEvent = async (req, res) => {
 // Admin approval methods
 exports.getPendingEvents = async (req, res) => {
   try {
-    const pendingEvents = await Event.find({ status: 'pending' }).populate('createdBy', 'name email');
+    // Only show pending events created by other users (not by the admin)
+    const pendingEvents = await Event.find({ 
+      status: 'pending',
+      createdBy: { $ne: req.session.user._id } // Not created by current admin
+    }).populate('createdBy', 'name email');
     res.render('events/pending', { title: 'Pending Events', events: pendingEvents, user: req.session.user });
   } catch (err) {
     req.flash('error', 'Could not load pending events.');
@@ -338,6 +342,13 @@ exports.approveEvent = async (req, res) => {
       req.flash('error', 'Event not found.');
       return res.redirect('/events/admin/pending');
     }
+    
+    // Admin cannot approve their own events
+    if (String(event.createdBy) === req.session.user._id) {
+      req.flash('error', 'You cannot approve your own events.');
+      return res.redirect('/events/admin/pending');
+    }
+    
     event.status = 'approved';
     event.approvedBy = req.session.user._id;
     event.approvedAt = new Date();
@@ -358,10 +369,16 @@ exports.rejectEvent = async (req, res) => {
       req.flash('error', 'Event not found.');
       return res.redirect('/events/admin/pending');
     }
-    event.status = 'rejected';
-    event.rejectionReason = rejectionReason || 'No reason provided';
-    await event.save();
-    req.flash('success', `Event "${event.title}" rejected.`);
+    
+    // Admin cannot reject their own events
+    if (String(event.createdBy) === req.session.user._id) {
+      req.flash('error', 'You cannot reject your own events.');
+      return res.redirect('/events/admin/pending');
+    }
+    
+    // Delete the event from database instead of marking as rejected
+    await event.deleteOne();
+    req.flash('success', `Event "${event.title}" has been rejected and removed.`);
     res.redirect('/events/admin/pending');
   } catch (err) {
     req.flash('error', 'Could not reject event.');
@@ -371,8 +388,12 @@ exports.rejectEvent = async (req, res) => {
 
 exports.approveAllEvents = async (req, res) => {
   try {
+    // Only approve events created by other users
     const result = await Event.updateMany(
-      { status: 'pending' },
+      { 
+        status: 'pending',
+        createdBy: { $ne: req.session.user._id } // Not created by current admin
+      },
       { 
         status: 'approved', 
         approvedBy: req.session.user._id, 
@@ -384,5 +405,43 @@ exports.approveAllEvents = async (req, res) => {
   } catch (err) {
     req.flash('error', 'Could not approve all events.');
     res.redirect('/events/admin/pending');
+  }
+};
+
+// Show event details with registered users (for event creators)
+exports.showEventDetails = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      req.flash('error', 'Event not found.');
+      return res.redirect('/dashboard');
+    }
+    
+    // Only event creator can view details
+    if (String(event.createdBy) !== req.session.user._id) {
+      req.flash('error', 'Access denied. You can only view details of events you created.');
+      return res.redirect('/dashboard');
+    }
+    
+    // Get all RSVPs for this event with user details
+    const rsvps = await RSVP.find({ 
+      eventId: event._id,
+      paymentStatus: 'paid'
+    }).populate('userId', 'name email phone age gender');
+    
+    // Get organizer information
+    const organizer = await User.findById(event.createdBy);
+    
+    res.render('events/details', { 
+      title: `Event Details - ${event.title}`, 
+      event, 
+      user: req.session.user,
+      organizer: organizer,
+      registrations: rsvps
+    });
+  } catch (err) {
+    console.error('Event details error:', err);
+    req.flash('error', 'Could not load event details.');
+    res.redirect('/dashboard');
   }
 };

@@ -20,16 +20,11 @@ exports.createNotification = async (userId, title, message, type = 'system', rel
 };
 
 // Get user's notifications
-exports.getUserNotifications = async (userId, limit = 10) => {
+exports.getUserNotifications = async (userId) => {
   try {
-    const notifications = await Notification.find({ userId })
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .populate('relatedEventId', 'title')
-      .populate('relatedUserId', 'name');
-    return notifications;
+    return await Notification.find({ userId }).sort({ createdAt: -1 });
   } catch (error) {
-    console.error('Error fetching notifications:', error);
+    console.error('Error getting user notifications:', error);
     throw error;
   }
 };
@@ -37,10 +32,9 @@ exports.getUserNotifications = async (userId, limit = 10) => {
 // Get unread notification count
 exports.getUnreadCount = async (userId) => {
   try {
-    const count = await Notification.countDocuments({ userId, read: false });
-    return count;
+    return await Notification.countDocuments({ userId, read: false });
   } catch (error) {
-    console.error('Error counting unread notifications:', error);
+    console.error('Error getting unread count:', error);
     throw error;
   }
 };
@@ -63,10 +57,11 @@ exports.markAsRead = async (notificationId, userId) => {
 // Mark all notifications as read
 exports.markAllAsRead = async (userId) => {
   try {
-    await Notification.updateMany(
+    const result = await Notification.updateMany(
       { userId, read: false },
       { read: true }
     );
+    return result;
   } catch (error) {
     console.error('Error marking all notifications as read:', error);
     throw error;
@@ -76,10 +71,23 @@ exports.markAllAsRead = async (userId) => {
 // Delete notification
 exports.deleteNotification = async (notificationId, userId) => {
   try {
-    const notification = await Notification.findOneAndDelete({ _id: notificationId, userId });
+    const notification = await Notification.findOneAndDelete({
+      _id: notificationId,
+      userId
+    });
     return notification;
   } catch (error) {
     console.error('Error deleting notification:', error);
+    throw error;
+  }
+};
+
+exports.deleteAllNotifications = async (userId) => {
+  try {
+    const result = await Notification.deleteMany({ userId });
+    return result;
+  } catch (error) {
+    console.error('Error deleting all notifications:', error);
     throw error;
   }
 };

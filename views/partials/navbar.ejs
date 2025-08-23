@@ -19,9 +19,10 @@
             <div id="notificationList" style="padding:0;">
               <!-- Notifications will be loaded here -->
             </div>
-            <div style="padding:0.5rem;border-top:1px solid #e5e7eb;text-align:center;">
-              <button id="markAllRead" style="background:var(--primary);color:white;border:none;padding:0.5rem 1rem;border-radius:4px;cursor:pointer;font-size:0.875rem;">Mark All Read</button>
-            </div>
+                         <div style="padding:0.5rem;border-top:1px solid #e5e7eb;text-align:center;display:flex;gap:0.5rem;">
+               <button id="markAllRead" style="background:var(--primary);color:white;border:none;padding:0.5rem 1rem;border-radius:4px;cursor:pointer;font-size:0.875rem;">Mark All Read</button>
+               <button id="clearAllNotifications" style="background:var(--accent);color:white;border:none;padding:0.5rem 1rem;border-radius:4px;cursor:pointer;font-size:0.875rem;">Clear All</button>
+             </div>
           </div>
         </div>
         
@@ -70,23 +71,44 @@ document.addEventListener('DOMContentLoaded', function() {
       notificationDropdown.style.display = 'none';
     });
 
-    // Mark all as read
-    markAllRead.addEventListener('click', function() {
-      fetch('/notifications/mark-all-read', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          loadNotifications();
-          loadUnreadCount();
-        }
-      })
-      .catch(error => console.error('Error:', error));
-    });
+           // Mark all as read
+       markAllRead.addEventListener('click', function() {
+         fetch('/notifications/mark-all-read', {
+           method: 'PUT',
+           headers: {
+             'Content-Type': 'application/json'
+           }
+         })
+         .then(response => response.json())
+         .then(data => {
+           if (data.success) {
+             loadNotifications();
+             loadUnreadCount();
+           }
+         })
+         .catch(error => console.error('Error:', error));
+       });
+
+       // Clear all notifications
+       const clearAllNotifications = document.getElementById('clearAllNotifications');
+       clearAllNotifications.addEventListener('click', function() {
+         if (confirm('Are you sure you want to delete all notifications? This action cannot be undone.')) {
+           fetch('/notifications', {
+             method: 'DELETE',
+             headers: {
+               'Content-Type': 'application/json'
+             }
+           })
+           .then(response => response.json())
+           .then(data => {
+             if (data.success) {
+               loadNotifications();
+               loadUnreadCount();
+             }
+           })
+           .catch(error => console.error('Error:', error));
+         }
+       });
   }
 
   function loadNotifications() {
@@ -107,19 +129,38 @@ document.addEventListener('DOMContentLoaded', function() {
               ${!notification.read ? 'background-color: #fef3c7;' : ''}
             `;
             
-            notificationItem.innerHTML = `
-              <div style="font-weight: 600; color: var(--primary); margin-bottom: 0.25rem;">${notification.title}</div>
-              <div style="color: var(--muted); font-size: 0.875rem;">${notification.message}</div>
-              <div style="color: var(--muted); font-size: 0.75rem; margin-top: 0.5rem;">
-                ${new Date(notification.createdAt).toLocaleDateString()}
-              </div>
-            `;
+                         notificationItem.innerHTML = `
+               <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                 <div style="flex: 1;">
+                   <div style="font-weight: 600; color: var(--primary); margin-bottom: 0.25rem;">${notification.title}</div>
+                   <div style="color: var(--muted); font-size: 0.875rem;">${notification.message}</div>
+                   <div style="color: var(--muted); font-size: 0.75rem; margin-top: 0.5rem;">
+                     ${new Date(notification.createdAt).toLocaleDateString()}
+                   </div>
+                 </div>
+                 <button class="delete-notification" data-id="${notification._id}" style="background: none; border: none; color: var(--muted); cursor: pointer; padding: 0.25rem; font-size: 1rem; margin-left: 0.5rem;">×</button>
+               </div>
+             `;
             
-            notificationItem.addEventListener('click', function() {
-              if (!notification.read) {
-                markAsRead(notification._id);
-              }
-            });
+                         // Add click handler for the notification item (to mark as read)
+             notificationItem.addEventListener('click', function(e) {
+               // Don't trigger if clicking the delete button
+               if (e.target.classList.contains('delete-notification')) {
+                 return;
+               }
+               if (!notification.read) {
+                 markAsRead(notification._id);
+               }
+             });
+
+             // Add click handler for delete button
+             const deleteBtn = notificationItem.querySelector('.delete-notification');
+             deleteBtn.addEventListener('click', function(e) {
+               e.stopPropagation();
+               if (confirm('Delete this notification?')) {
+                 deleteNotification(notification._id);
+               }
+             });
             
             notificationList.appendChild(notificationItem);
           });
@@ -142,19 +183,36 @@ document.addEventListener('DOMContentLoaded', function() {
       .catch(error => console.error('Error:', error));
   }
 
-  function markAsRead(notificationId) {
-    fetch(`/notifications/${notificationId}/read`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      loadNotifications();
-      loadUnreadCount();
-    })
-    .catch(error => console.error('Error:', error));
-  }
+     function markAsRead(notificationId) {
+     fetch(`/notifications/${notificationId}/read`, {
+       method: 'PUT',
+       headers: {
+         'Content-Type': 'application/json'
+       }
+     })
+     .then(response => response.json())
+     .then(data => {
+       loadNotifications();
+       loadUnreadCount();
+     })
+     .catch(error => console.error('Error:', error));
+   }
+
+   function deleteNotification(notificationId) {
+     fetch(`/notifications/${notificationId}`, {
+       method: 'DELETE',
+       headers: {
+         'Content-Type': 'application/json'
+       }
+     })
+     .then(response => response.json())
+     .then(data => {
+       if (data.success) {
+         loadNotifications();
+         loadUnreadCount();
+       }
+     })
+     .catch(error => console.error('Error:', error));
+   }
 });
 </script>

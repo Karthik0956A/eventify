@@ -54,12 +54,12 @@
               <%= event.remainingSeats %> seats left
             </span>
           </div>
-          <div style="display:flex;gap:0.5rem;">
-            <a href="/events/<%= event._id %>" class="btn btn-accent" style="flex:1;text-align:center;">View Details</a>
-            <% if (user && (String(event.createdBy) === user._id || user.role === 'admin')) { %>
-              <a href="/events/<%= event._id %>/edit" class="btn" style="background:var(--accent);">Edit</a>
-            <% } %>
-          </div>
+                           <div style="display:flex;gap:0.5rem;">
+                   <a href="/events/<%= event._id %>" class="btn btn-accent" style="flex:1;text-align:center;">View Details</a>
+                   <% if (user && String(event.createdBy) === user._id) { %>
+                     <a href="/events/<%= event._id %>/edit" class="btn" style="background:var(--accent);">Edit</a>
+                   <% } %>
+                 </div>
         </div>
       <% }) %>
     <% } else { %>

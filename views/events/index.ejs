@@ -36,38 +36,52 @@
   </div>
 </div>
 
-<div class="container">
+
   <div id="eventsContainer" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:2rem;">
     <% if (events && events.length) { %>
       <% events.forEach(event => { %>
-        <div class="event-card card" data-title="<%= event.title.toLowerCase() %>" data-category="<%= event.category %>" data-date="<%= event.date %>">
-          <img src="<%= event.bannerUrl || '/images/default-event.jpg' %>" alt="Event Banner" style="width:100%;border-radius:var(--radius);margin-bottom:1rem;max-height:180px;object-fit:cover;">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;">
-            <h2 style="margin:0;font-size:1.25rem;"><%= event.title %></h2>
-            <% if (user && user.role === 'admin') { %>
-              <span style="background:var(--primary);color:white;padding:0.25rem 0.5rem;border-radius:var(--radius);font-size:0.75rem;"><%= event.status %></span>
+        <div class="event-card card" 
+             data-title="<%= event.title.toLowerCase() %>" 
+             data-category="<%= event.category %>" 
+             data-date="<%= event.date %>"
+             style="display:flex;flex-direction:column;justify-content:space-between;padding:1rem;border:1px solid #e5e7eb;border-radius:var(--radius);">
+
+          <!-- Image -->
+          <img src="<%= event.bannerUrl || '/images/default-event.jpg' %>" 
+               alt="Event Banner" 
+               style="width:100%;height:200px;border-radius:var(--radius);margin-bottom:1rem;object-fit:cover;">
+
+          <!-- Event Content -->
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-start;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;">
+              <h2 style="margin:0;font-size:1.25rem;"><%= event.title %></h2>
+              <% if (user && user.role === 'admin') { %>
+                <span style="background:var(--primary);color:white;padding:0.25rem 0.5rem;border-radius:var(--radius);font-size:0.75rem;"><%= event.status %></span>
+              <% } %>
+            </div>
+            <p style="color:var(--muted);margin:0 0 0.5rem 0;font-size:0.875rem;">
+              📍 <%= event.location %> &middot; 📅 <%= event.date %>
+            </p>
+            <p style="color:var(--muted);margin:0 0 1rem 0;font-size:0.875rem;line-height:1.4;">
+              <%= event.description ? event.description.substring(0, 80) : '' %>...
+            </p>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+              <span style="font-weight:600;color:var(--primary);font-size:1.1rem;">
+                $<%= event.price %>
+              </span>
+              <span style="color:var(--muted);font-size:0.875rem;">
+                <%= event.remainingSeats %> seats left
+              </span>
+            </div>
+          </div>
+
+          <!-- Buttons pinned at bottom -->
+          <div style="display:flex;gap:0.5rem;margin-top:auto;">
+            <a href="/events/<%= event._id %>" class="btn btn-accent" style="flex:1;text-align:center;">View Details</a>
+            <% if (user && String(event.createdBy) === user._id) { %>
+              <a href="/events/<%= event._id %>/edit" class="btn" style="background:var(--accent);">Edit</a>
             <% } %>
           </div>
-          <p style="color:var(--muted);margin:0 0 0.5rem 0;font-size:0.875rem;">
-            📍 <%= event.location %> &middot; 📅 <%= event.date %>
-          </p>
-          <p style="color:var(--muted);margin:0 0 1rem 0;font-size:0.875rem;line-height:1.4;">
-            <%= event.description ? event.description.substring(0, 80) : '' %>...
-          </p>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-            <span style="font-weight:600;color:var(--primary);font-size:1.1rem;">
-              $<%= event.price %>
-            </span>
-            <span style="color:var(--muted);font-size:0.875rem;">
-              <%= event.remainingSeats %> seats left
-            </span>
-          </div>
-                           <div style="display:flex;gap:0.5rem;">
-                   <a href="/events/<%= event._id %>" class="btn btn-accent" style="flex:1;text-align:center;">View Details</a>
-                   <% if (user && String(event.createdBy) === user._id) { %>
-                     <a href="/events/<%= event._id %>/edit" class="btn" style="background:var(--accent);">Edit</a>
-                   <% } %>
-                 </div>
         </div>
       <% }) %>
     <% } else { %>
@@ -100,26 +114,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
       let showCard = true;
 
-      // Search filter
-      if (searchTerm && !title.includes(searchTerm)) {
-        showCard = false;
-      }
+      if (searchTerm && !title.includes(searchTerm)) showCard = false;
+      if (selectedCategory && category !== selectedCategory) showCard = false;
+      if (selectedDate && date !== selectedDate) showCard = false;
 
-      // Category filter
-      if (selectedCategory && category !== selectedCategory) {
-        showCard = false;
-      }
-
-      // Date filter
-      if (selectedDate && date !== selectedDate) {
-        showCard = false;
-      }
-
-      card.style.display = showCard ? 'block' : 'none';
+      card.style.display = showCard ? 'flex' : 'none';
     });
 
-    // Show/hide "no events" message
-    const visibleCards = document.querySelectorAll('.event-card[style*="display: block"], .event-card:not([style*="display: none"])');
+    const visibleCards = document.querySelectorAll('.event-card[style*="display: flex"], .event-card:not([style*="display: none"])');
     const noEventsMessage = document.querySelector('.card[style*="text-align:center"]');
     
     if (visibleCards.length === 0 && noEventsMessage) {
@@ -129,7 +131,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Add event listeners
   searchInput.addEventListener('input', filterEvents);
   categoryFilter.addEventListener('change', filterEvents);
   dateFilter.addEventListener('change', filterEvents);
@@ -140,12 +141,10 @@ function clearFilters() {
   document.getElementById('categoryFilter').value = '';
   document.getElementById('dateFilter').value = '';
   
-  // Show all cards
   document.querySelectorAll('.event-card').forEach(card => {
-    card.style.display = 'block';
+    card.style.display = 'flex';
   });
   
-  // Hide "no events" message if it exists
   const noEventsMessage = document.querySelector('.card[style*="text-align:center"]');
   if (noEventsMessage) {
     noEventsMessage.style.display = 'none';

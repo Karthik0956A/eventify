@@ -1,4 +1,4 @@
-<div class="container" style="max-width:600px;margin:2rem auto;">
+<div style="max-width:600px;margin:2rem auto;">
   <div class="card">
     <h2 style="text-align:center;margin-bottom:1.5rem;">Edit Event</h2>
     <form action="/events/<%= event ? event._id : '' %>?_method=PUT" method="POST" enctype="multipart/form-data">
@@ -7,7 +7,15 @@
       <input type="text" name="location" placeholder="Location" value="<%= event ? event.location : '' %>" required>
       <input type="date" name="date" value="<%= event ? event.date : '' %>" required>
       <input type="time" name="time" value="<%= event ? event.time : '' %>" required>
-      <input type="text" name="category" placeholder="Category" value="<%= event ? event.category : '' %>" required>
+      <select name="category" required style="padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius); background: white; width: 100%;">
+        <option value="">Select Category</option>
+        <option value="Technology" <%= event && event.category === 'Technology' ? 'selected' : '' %>>Technology</option>
+        <option value="Business" <%= event && event.category === 'Business' ? 'selected' : '' %>>Business</option>
+        <option value="Education" <%= event && event.category === 'Education' ? 'selected' : '' %>>Education</option>
+        <option value="Entertainment" <%= event && event.category === 'Entertainment' ? 'selected' : '' %>>Entertainment</option>
+        <option value="Sports" <%= event && event.category === 'Sports' ? 'selected' : '' %>>Sports</option>
+        <option value="Other" <%= event && event.category === 'Other' ? 'selected' : '' %>>Other</option>
+      </select>
       <input type="number" name="price" placeholder="Price (USD)" min="0" step="0.01" value="<%= event ? event.price : '' %>">
       <input type="number" name="capacity" placeholder="Capacity" min="1" value="<%= event ? event.capacity : '' %>" required>
       <label style="margin-bottom:0.5rem;display:block;">Banner Image (leave blank to keep current)</label>

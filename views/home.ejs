@@ -1,25 +1,25 @@
-  <div class="hero-section" style="text-align: center; padding: 3rem 0; background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; border-radius: 12px; margin-bottom: 2rem;">
-      <h1>Discover & Join Amazing Events</h1>
-      <p>Find, create, and manage community events with ease.</p>
-      <% if (user) { %>
-        <div style="margin-top:1rem;">
-          <a href="/events/new" class="btn btn-accent">+ Create New Event</a>
-          <a href="/dashboard" class="btn" style="margin-left:0.5rem;">Dashboard</a>
-          <% if (user && user.role === 'admin') { %>
-            <a href="/events/admin/pending" class="btn" style="margin-left:0.5rem;background:var(--accent);">Review Pending Events</a>
-          <% } %>
+<div class="hero">
+    <h1>Discover & Join Amazing Events</h1>
+        <p>Find, create, and manage community events with ease.</p>
+        <% if (user) { %>
+          <div style="margin-top:1rem;">
+            <a href="/events/new" class="btn btn-accent">+ Create New Event</a>
+            <a href="/dashboard" class="btn" style="margin-left:0.5rem;">Dashboard</a>
+            <% if (user && user.role === 'admin') { %>
+              <a href="/events/admin/pending" class="btn" style="margin-left:0.5rem;background:var(--accent);">Review Pending Events</a>
+            <% } %>
+          </div>
+          <% } %> 
+      <% if (!user) { %>
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+          <a href="/auth/login" class="btn" style="background: white; color: var(--primary); padding: 0.75rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600;">Login</a>
+          <a href="/auth/register" class="btn" style="background: var(--accent); color: white; padding: 0.75rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600;">Register</a>
         </div>
-        <% } %> 
-    <% if (!user) { %>
-      <div style="display: flex; gap: 1rem; justify-content: center;">
-        <a href="/auth/login" class="btn" style="background: white; color: var(--primary); padding: 0.75rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600;">Login</a>
-        <a href="/auth/register" class="btn" style="background: var(--accent); color: white; padding: 0.75rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600;">Register</a>
-      </div>
-    <% } %>
+      <% } %>
   </div>
-
+  
   <!-- Dynamic Search Bar -->
-<div class="card" style="margin-bottom:2rem;">
+  <div class="card" style="margin-bottom:2rem;">
     <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;">
       <input type="text" id="searchInput" placeholder="Search events..." style="flex:2;padding:0.75rem;border:1px solid #e5e7eb;border-radius:4px;">
       <select id="categoryFilter" style="flex:1;padding:0.75rem;border:1px solid #e5e7eb;border-radius:4px;">
@@ -35,131 +35,120 @@
       <button class="btn" onclick="clearFilters()">Clear</button>
     </div>
   </div>
-
-  <!-- Events Grid -->
-  <div class="events-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem;">
-    <% if (events && events.length > 0) { %>
-      <% events.forEach(event => { %>
-        <div class="event-card" style="background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; transition: transform 0.2s;">
-          <div class="event-image" style="height: 200px; background: linear-gradient(45deg, var(--primary), var(--accent)); position: relative;">
-            <% if (event.bannerUrl) { %>
-              <img src="<%= event.bannerUrl %>" alt="<%= event.title %>" style="width: 100%; height: 100%; object-fit: cover;">
-            <% } else { %>
-              <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: white; font-size: 3rem;">🎉</div>
-            <% } %>
-            <div style="position: absolute; top: 1rem; right: 1rem; background: var(--accent); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem; font-weight: 600;">
-              <%= event.category %>
+  
+  <div class="container">
+    <div id="eventsContainer" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:2rem;">
+      <% if (events && events.length) { %>
+        <% events.forEach(event => { %>
+          <div class="event-card card" 
+               data-title="<%= event.title.toLowerCase() %>" 
+               data-category="<%= event.category %>" 
+               data-date="<%= event.date %>"
+               style="display:flex;flex-direction:column;justify-content:space-between;padding:1rem;border:1px solid #e5e7eb;border-radius:var(--radius);">
+  
+            <!-- Image -->
+            <img src="<%= event.bannerUrl || '/images/default-event.jpg' %>" 
+                 alt="Event Banner" 
+                 style="width:100%;height:200px;border-radius:var(--radius);margin-bottom:1rem;object-fit:cover;">
+  
+            <!-- Event Content -->
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-start;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;">
+                <h2 style="margin:0;font-size:1.25rem;"><%= event.title %></h2>
+                <% if (user && user.role === 'admin') { %>
+                  <span style="background:var(--primary);color:white;padding:0.25rem 0.5rem;border-radius:var(--radius);font-size:0.75rem;"><%= event.status %></span>
+                <% } %>
+              </div>
+              <p style="color:var(--muted);margin:0 0 0.5rem 0;font-size:0.875rem;">
+                📍 <%= event.location %> &middot; 📅 <%= event.date %>
+              </p>
+              <p style="color:var(--muted);margin:0 0 1rem 0;font-size:0.875rem;line-height:1.4;">
+                <%= event.description ? event.description.substring(0, 80) : '' %>...
+              </p>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                <span style="font-weight:600;color:var(--primary);font-size:1.1rem;">
+                  $<%= event.price %>
+                </span>
+                <span style="color:var(--muted);font-size:0.875rem;">
+                  <%= event.remainingSeats %> seats left
+                </span>
+              </div>
             </div>
-          </div>
-          
-          <div class="event-content" style="padding: 1.5rem;">
-            <h3 style="margin: 0 0 0.5rem 0; color: var(--primary); font-size: 1.25rem;"><%= event.title %></h3>
-            <p style="color: var(--muted); margin: 0 0 1rem 0; line-height: 1.5;"><%= event.description.length > 100 ? event.description.substring(0, 100) + '...' : event.description %></p>
-            
-            <div class="event-details" style="margin-bottom: 1rem;">
-              <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; color: var(--muted);">
-                <span>📍</span>
-                <span><%= event.location %></span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; color: var(--muted);">
-                <span>📅</span>
-                <span><%= new Date(event.date).toLocaleDateString() %> at <%= event.time %></span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--muted);">
-                <span>👥</span>
-                <span><%= event.remainingSeats %> seats remaining</span>
-              </div>
-              <% if (event.price > 0) { %>
-                <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--accent); font-weight: 600; margin-top: 0.5rem;">
-                  <span>💰</span>
-                  <span>$<%= event.price %></span>
-                </div>
+  
+            <!-- Buttons pinned at bottom -->
+            <div style="display:flex;gap:0.5rem;margin-top:auto;">
+              <a href="/events/<%= event._id %>" class="btn btn-accent" style="flex:1;text-align:center;">View Details</a>
+              <% if (user && String(event.createdBy) === user._id) { %>
+                <a href="/events/<%= event._id %>/edit" class="btn" style="background:var(--accent);">Edit</a>
               <% } %>
             </div>
-            
-            <a href="/events/<%= event._id %>" class="btn" style="background: var(--primary); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; display: inline-block; text-align: center; width: 100%; font-weight: 600;">View Details</a>
           </div>
+        <% }) %>
+      <% } else { %>
+        <div class="card" style="text-align:center;grid-column:1/-1;">
+          <h3>No events found</h3>
+          <p style="color:var(--muted);margin-bottom:1rem;">Be the first to create an amazing event!</p>
+          <a href="/events/new" class="btn btn-accent">Create Your First Event</a>
         </div>
-      <% }); %>
-    <% } else { %>
-      <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--muted);">
-        <div style="font-size: 4rem; margin-bottom: 1rem;">📅</div>
-        <h3 style="margin-bottom: 1rem;">No events found</h3>
-        <p>Try adjusting your search criteria or check back later for new events.</p>
-      </div>
-    <% } %>
+      <% } %>
+    </div>
   </div>
-</div>
-
-<script>
-    // Dynamic search functionality
-    document.addEventListener('DOMContentLoaded', function() {
-      const searchInput = document.getElementById('searchInput');
-      const categoryFilter = document.getElementById('categoryFilter');
-      const dateFilter = document.getElementById('dateFilter');
-      const eventCards = document.querySelectorAll('.event-card');
-    
-      function filterEvents() {
-        const searchTerm = searchInput.value.toLowerCase();
-        const selectedCategory = categoryFilter.value;
-        const selectedDate = dateFilter.value;
-    
-        eventCards.forEach(card => {
-          const title = card.dataset.title;
-          const category = card.dataset.category;
-          const date = card.dataset.date;
-    
-          let showCard = true;
-    
-          // Search filter
-          if (searchTerm && !title.includes(searchTerm)) {
-            showCard = false;
-          }
-    
-          // Category filter
-          if (selectedCategory && category !== selectedCategory) {
-            showCard = false;
-          }
-    
-          // Date filter
-          if (selectedDate && date !== selectedDate) {
-            showCard = false;
-          }
-    
-          card.style.display = showCard ? 'block' : 'none';
-        });
-    
-        // Show/hide "no events" message
-        const visibleCards = document.querySelectorAll('.event-card[style*="display: block"], .event-card:not([style*="display: none"])');
-        const noEventsMessage = document.querySelector('.card[style*="text-align:center"]');
-        
-        if (visibleCards.length === 0 && noEventsMessage) {
-          noEventsMessage.style.display = 'block';
-        } else if (noEventsMessage) {
-          noEventsMessage.style.display = 'none';
-        }
-      }
-    
-      // Add event listeners
-      searchInput.addEventListener('input', filterEvents);
-      categoryFilter.addEventListener('change', filterEvents);
-      dateFilter.addEventListener('change', filterEvents);
-    });
-    
-    function clearFilters() {
-      document.getElementById('searchInput').value = '';
-      document.getElementById('categoryFilter').value = '';
-      document.getElementById('dateFilter').value = '';
-      
-      // Show all cards
-      document.querySelectorAll('.event-card').forEach(card => {
-        card.style.display = 'block';
+  
+  <script>
+  // Dynamic search functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const dateFilter = document.getElementById('dateFilter');
+    const eventCards = document.querySelectorAll('.event-card');
+  
+    function filterEvents() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const selectedCategory = categoryFilter.value;
+      const selectedDate = dateFilter.value;
+  
+      eventCards.forEach(card => {
+        const title = card.dataset.title;
+        const category = card.dataset.category;
+        const date = card.dataset.date;
+  
+        let showCard = true;
+  
+        if (searchTerm && !title.includes(searchTerm)) showCard = false;
+        if (selectedCategory && category !== selectedCategory) showCard = false;
+        if (selectedDate && date !== selectedDate) showCard = false;
+  
+        card.style.display = showCard ? 'flex' : 'none';
       });
-      
-      // Hide "no events" message if it exists
+  
+      const visibleCards = document.querySelectorAll('.event-card[style*="display: flex"], .event-card:not([style*="display: none"])');
       const noEventsMessage = document.querySelector('.card[style*="text-align:center"]');
-      if (noEventsMessage) {
+      
+      if (visibleCards.length === 0 && noEventsMessage) {
+        noEventsMessage.style.display = 'block';
+      } else if (noEventsMessage) {
         noEventsMessage.style.display = 'none';
       }
     }
-    </script>
+  
+    searchInput.addEventListener('input', filterEvents);
+    categoryFilter.addEventListener('change', filterEvents);
+    dateFilter.addEventListener('change', filterEvents);
+  });
+  
+  function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('categoryFilter').value = '';
+    document.getElementById('dateFilter').value = '';
+    
+    document.querySelectorAll('.event-card').forEach(card => {
+      card.style.display = 'flex';
+    });
+    
+    const noEventsMessage = document.querySelector('.card[style*="text-align:center"]');
+    if (noEventsMessage) {
+      noEventsMessage.style.display = 'none';
+    }
+  }
+  </script>
+  

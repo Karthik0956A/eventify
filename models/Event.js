@@ -6,7 +6,11 @@ const eventSchema = new mongoose.Schema({
   date: { type: String, required: true },
   time: { type: String, required: true },
   location: { type: String, required: true },
-  category: { type: String, required: true },
+  category: { 
+    type: String, 
+    required: true,
+    enum: ['Technology', 'Business', 'Education', 'Entertainment', 'Sports', 'Other']
+  },
   price: { type: Number, default: 0 },
   capacity: { type: Number, required: true },
   remainingSeats: { type: Number, required: true },

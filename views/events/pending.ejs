@@ -1,57 +1,65 @@
-<div class="container">
-  <div class="hero">
-    <h1>Pending Events Review</h1>
-    <p>Review and approve events created by other users before they go live.</p>
-    <div style="margin-top:1rem;">
-      <form action="/events/admin/approve-all" method="POST" style="display:inline;">
+<div class="container" style="max-width:1000px;margin:2rem auto;display:flex;flex-direction:column;gap:2rem;">
+
+  <!-- Hero Section -->
+  <div class="card" style="padding:2rem;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.08);text-align:center;">
+    <h1 style="margin-bottom:0.5rem;color:#1d4ed8;font-size:1.5rem;">Pending Events Review</h1>
+    <p style="color:#6b7280;margin-bottom:1.5rem;font-size:1rem;">Review and approve events created by other users before they go live.</p>
+    <div style="display:flex;justify-content:center;gap:0.75rem;flex-wrap:wrap;">
+      <form action="/events/admin/approve-all" method="POST" style="margin:0;">
         <button class="btn btn-accent" type="submit" onclick="return confirm('Are you sure you want to approve ALL pending events created by other users?')">Approve All Events</button>
       </form>
-      <a href="/dashboard" class="btn" style="margin-left:0.5rem;">Back to Dashboard</a>
+      <a href="/dashboard" class="btn" style="background:#6b7280;color:white;">Back to Dashboard</a>
     </div>
   </div>
 
   <% if (events && events.length) { %>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:2rem;">
+    <div style="display:flex;flex-wrap:wrap;gap:1.5rem;justify-content:center;">
       <% events.forEach(event => { %>
-        <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;">
-            <h3 style="margin:0;"><%= event.title %></h3>
-            <span style="background:var(--accent);color:white;padding:0.25rem 0.5rem;border-radius:var(--radius);font-size:0.875rem;">Pending</span>
+        <div class="card" style="width:700px;padding:1.5rem;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.08);display:flex;flex-direction:column;gap:0.75rem;">
+
+          <!-- Event Title -->
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <h3 style="margin:0;font-size:1.25rem;color:#1d4ed8;font-weight:600;"><%= event.title %></h3>
+            <span style="background:#f97316;color:white;padding:0.25rem 0.5rem;border-radius:8px;font-size:0.75rem;">Pending</span>
           </div>
-          
+
+          <!-- Event Image -->
           <% if (event.bannerUrl) { %>
-            <img src="<%= event.bannerUrl %>" alt="Event Banner" style="width:100%;border-radius:var(--radius);margin-bottom:1rem;max-height:200px;object-fit:cover;">
+            <img src="<%= event.bannerUrl %>" alt="Event Banner" style="width:100%;border-radius:12px;max-height:200px;object-fit:cover;margin-bottom:0.75rem;">
           <% } %>
-          
-          <p style="margin:0 0 0.5rem 0;"><strong>Created by:</strong> <%= event.createdBy.name %> (<%= event.createdBy.email %>)</p>
-          <p style="margin:0 0 0.5rem 0;"><strong>Location:</strong> <%= event.location %></p>
-          <p style="margin:0 0 0.5rem 0;"><strong>Date:</strong> <%= event.date %> at <%= event.time %></p>
-          <p style="margin:0 0 0.5rem 0;"><strong>Category:</strong> <%= event.category %></p>
-          <p style="margin:0 0 0.5rem 0;"><strong>Price:</strong> $<%= event.price %></p>
-          <p style="margin:0 0 1rem 0;"><strong>Capacity:</strong> <%= event.capacity %></p>
-          
-          <p style="margin:0 0 1rem 0;"><%= event.description %></p>
-          
-          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-            <form action="/events/admin/approve/<%= event._id %>" method="POST" style="margin:0;">
-              <button class="btn btn-accent" type="submit">Approve</button>
+
+          <!-- Event Details -->
+          <p style="margin:0;font-size:0.875rem;color:#374151;"><strong>Created by:</strong> <%= event.createdBy.name %> (<%= event.createdBy.email %>)</p>
+          <p style="margin:0;font-size:0.875rem;color:#374151;"><strong>Location:</strong> <%= event.location %></p>
+          <p style="margin:0;font-size:0.875rem;color:#374151;"><strong>Date:</strong> <%= event.date %> at <%= event.time %></p>
+          <p style="margin:0;font-size:0.875rem;color:#374151;"><strong>Category:</strong> <%= event.category %></p>
+          <p style="margin:0;font-size:0.875rem;color:#374151;"><strong>Price:</strong> $<%= event.price %></p>
+          <p style="margin:0;font-size:0.875rem;color:#374151;"><strong>Capacity:</strong> <%= event.capacity %></p>
+          <p style="margin:0;font-size:0.875rem;color:#374151;"><%= event.description %></p>
+
+          <!-- Buttons Row -->
+          <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:nowrap;margin-top:0.5rem;justify-content:flex-start;">
+            <form action="/events/admin/approve/<%= event._id %>" method="POST" style="margin:0;flex-shrink:0;">
+              <button class="btn btn-accent" type="submit" style="background:#f59e0b;color:white;">Approve</button>
             </form>
-            
-            <form action="/events/admin/reject/<%= event._id %>" method="POST" style="margin:0;display:inline;">
-              <input type="text" name="rejectionReason" placeholder="Rejection reason (optional)" style="margin-bottom:0.5rem;">
-              <button class="btn" type="submit" style="background:#dc2626;color:white;">Reject</button>
+
+            <form action="/events/admin/reject/<%= event._id %>" method="POST" style="margin:0;display:flex;gap:0.25rem;align-items:center;flex-shrink:0;">
+              <input type="text" name="rejectionReason" placeholder="Reason" style="padding:0.3rem;border:1px solid #d1d5db;border-radius:8px;width:120px;flex-shrink:0;">
+              <button class="btn" type="submit" style="background:#ef4444;color:white;flex-shrink:0;">Reject</button>
             </form>
-            
-            <a href="/events/<%= event._id %>" class="btn" style="background:var(--muted);">View Details</a>
+
+            <a href="/events/<%= event._id %>" class="btn" style="background:#9ca3af;color:white;white-space:nowrap;flex-shrink:0;">View</a>
           </div>
+
         </div>
       <% }) %>
     </div>
   <% } else { %>
-    <div class="card" style="text-align:center;">
+    <div class="card" style="text-align:center;width:360px;padding:2rem;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.08);margin:2rem auto;">
       <h3>No Pending Events</h3>
-      <p style="color:var(--muted);">All events have been reviewed!</p>
-      <a href="/dashboard" class="btn btn-accent">Back to Dashboard</a>
+      <p style="color:#6b7280;margin-bottom:1rem;">All events have been reviewed!</p>
+      <a href="/dashboard" class="btn btn-accent" style="background:#f59e0b;color:white;">Back to Dashboard</a>
     </div>
   <% } %>
+
 </div>

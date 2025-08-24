@@ -51,13 +51,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// Home route placeholder
-app.get('/', (req, res) => {
-  if (!req.session.user) {
-    return res.redirect('/auth/login');
-  }
-  res.redirect('/events');
-});
+// Home route
+const homeController = require('./controllers/homeController');
+app.get('/', homeController.getHomePage);
 
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');

@@ -1,13 +1,21 @@
 <div class="hero">
   <h1>Discover & Join Amazing Events</h1>
-  <p>Find, create, and manage community events with ease.</p>
-  <div style="margin-top:1rem;">
-    <a href="/events/new" class="btn btn-accent">+ Create New Event</a>
-    <a href="/dashboard" class="btn" style="margin-left:0.5rem;">Dashboard</a>
-    <% if (user && user.role === 'admin') { %>
-      <a href="/events/admin/pending" class="btn" style="margin-left:0.5rem;background:var(--accent);">Review Pending Events</a>
+      <p>Find, create, and manage community events with ease.</p>
+      <% if (user) { %>
+        <div style="margin-top:1rem;">
+          <a href="/events/new" class="btn btn-accent">+ Create New Event</a>
+          <a href="/dashboard" class="btn" style="margin-left:0.5rem;">Dashboard</a>
+          <% if (user && user.role === 'admin') { %>
+            <a href="/events/admin/pending" class="btn" style="margin-left:0.5rem;background:var(--accent);">Review Pending Events</a>
+          <% } %>
+        </div>
+        <% } %> 
+    <% if (!user) { %>
+      <div style="display: flex; gap: 1rem; justify-content: center;">
+        <a href="/auth/login" class="btn" style="background: white; color: var(--primary); padding: 0.75rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600;">Login</a>
+        <a href="/auth/register" class="btn" style="background: var(--accent); color: white; padding: 0.75rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600;">Register</a>
+      </div>
     <% } %>
-  </div>
 </div>
 
 <!-- Dynamic Search Bar -->

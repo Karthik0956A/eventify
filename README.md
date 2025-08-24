@@ -1,5 +1,5 @@
-<a href="https://eventify-uazq.onrender.com">Deployed Link</a><br>
-Admin Credentials<br>
+<a href="https://eventify-uazq.onrender.com">Deployed Link</a><br><br>
+<b>Admin Credentials</b><br>
 Email:admin@eventify.com<br>
 Password:admin123<br>
 # Eventify - Event Management Platform
@@ -248,6 +248,7 @@ For support and questions:
 ---
 
 **Eventify** - Making event management simple and engaging! 🎉
+
 
 
 

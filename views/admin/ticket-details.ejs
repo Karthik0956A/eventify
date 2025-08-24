@@ -1,0 +1,97 @@
+  <div class="hero">
+    <h1>Ticket Details</h1>
+    <p>View and respond to support ticket.</p>
+  </div>
+
+  <div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+      <h2 style="margin: 0; color: var(--primary);"><%= ticket.subject %></h2>
+      <span style="background: <%= ticket.status === 'resolved' ? 'var(--success)' : 'var(--warning)' %>; color: white; padding: 0.5rem 1rem; border-radius: var(--radius); font-weight: 600;">
+        <%= ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1) %>
+      </span>
+    </div>
+
+    <!-- User Information -->
+    <div style="background: var(--bg); padding: 1.5rem; border-radius: var(--radius); margin-bottom: 2rem;">
+      <h3 style="margin: 0 0 1rem 0; color: var(--primary);">User Information</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                 <div>
+           <strong>Name:</strong> <%= ticket.user ? ticket.user.name : 'Unknown User' %>
+         </div>
+         <div>
+           <strong>Email:</strong> <a href="mailto:<%= ticket.user ? ticket.user.email : '' %>"><%= ticket.user ? ticket.user.email : 'No email' %></a>
+         </div>
+        <div>
+          <strong>Ticket Created:</strong> <%= new Date(ticket.createdAt).toLocaleString() %>
+        </div>
+        <% if (ticket.adminRepliedAt) { %>
+          <div>
+            <strong>Replied:</strong> <%= new Date(ticket.adminRepliedAt).toLocaleString() %>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Original Message -->
+    <div style="margin-bottom: 2rem;">
+      <h3 style="margin: 0 0 1rem 0; color: var(--primary);">Original Message</h3>
+      <div style="background: var(--bg); padding: 1.5rem; border-radius: var(--radius); border-left: 4px solid var(--primary);">
+        <p style="margin: 0; line-height: 1.6; color: var(--text);"><%= ticket.description %></p>
+      </div>
+    </div>
+
+    <!-- Admin Response -->
+    <% if (ticket.adminReply) { %>
+      <div style="margin-bottom: 2rem;">
+        <h3 style="margin: 0 0 1rem 0; color: var(--primary);">Admin Response</h3>
+        <div style="background: #f0f9ff; padding: 1.5rem; border-radius: var(--radius); border-left: 4px solid var(--primary);">
+          <p style="margin: 0 0 1rem 0; line-height: 1.6; color: var(--text);"><%= ticket.adminReply %></p>
+                     <div style="font-size: 0.875rem; color: var(--muted);">
+             <strong>Replied by:</strong> <%= ticket.adminRepliedBy ? ticket.adminRepliedBy.name : 'Admin' %> 
+             on <%= ticket.adminRepliedAt ? new Date(ticket.adminRepliedAt).toLocaleString() : 'Unknown' %>
+           </div>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Reply Form (only for pending tickets) -->
+    <% if (ticket.status === 'pending') { %>
+      <div>
+        <h3 style="margin: 0 0 1rem 0; color: var(--primary);">Send Response</h3>
+        <form method="POST" action="/support/admin/queries/<%= ticket._id %>/reply">
+          <div style="margin-bottom: 1.5rem;">
+            <label for="reply" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text);">
+              Your Response *
+            </label>
+            <textarea 
+              id="reply" 
+              name="reply" 
+              required 
+              rows="8"
+              placeholder="Enter your detailed response to the user..."
+              style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius); resize: vertical; font-family: inherit;"
+            ></textarea>
+          </div>
+          
+          <div style="display: flex; gap: 1rem;">
+            <button type="submit" class="btn btn-accent">
+              Send Reply & Mark Resolved
+            </button>
+            <a href="/support/admin/queries" class="btn" style="background: var(--muted);">
+              Back to Queries
+            </a>
+          </div>
+        </form>
+      </div>
+    <% } else { %>
+      <div style="text-align: center; padding: 2rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+        <h3 style="margin: 0 0 0.5rem 0; color: var(--success);">Ticket Resolved</h3>
+        <p style="margin: 0 0 1rem 0; color: var(--muted);">This ticket has been resolved.</p>
+        <a href="/support/admin/queries" class="btn btn-accent">
+          Back to Queries
+        </a>
+      </div>
+    <% } %>
+  </div>
+</div>

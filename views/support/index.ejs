@@ -1,0 +1,97 @@
+  <div class="hero">
+    <h1>Help & Support</h1>
+    <p>Need help? Create a support ticket and we'll get back to you as soon as possible.</p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+    <!-- Create New Ticket -->
+    <div class="card">
+      <h2 style="margin-bottom: 1.5rem; color: var(--primary); display: flex; align-items: center; gap: 0.5rem;">
+        <span style="font-size: 1.5rem;">📝</span>
+        Create New Ticket
+      </h2>
+      
+      <form method="POST" action="/support">
+        <div style="margin-bottom: 1rem;">
+          <label for="subject" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text);">
+            Subject *
+          </label>
+          <input 
+            type="text" 
+            id="subject" 
+            name="subject" 
+            required 
+            placeholder="Brief description of your issue"
+            style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface);"
+          >
+        </div>
+        
+        <div style="margin-bottom: 1.5rem;">
+          <label for="description" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text);">
+            Description *
+          </label>
+          <textarea 
+            id="description" 
+            name="description" 
+            required 
+            rows="6"
+            placeholder="Please provide detailed information about your issue..."
+            style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); resize: vertical;"
+          ></textarea>
+        </div>
+        
+        <button type="submit" class="btn btn-accent" style="width: 100%;">
+          Submit Ticket
+        </button>
+      </form>
+    </div>
+
+    <!-- Your Tickets -->
+    <div class="card">
+      <h2 style="margin-bottom: 1.5rem; color: var(--primary); display: flex; align-items: center; gap: 0.5rem;">
+        <span style="font-size: 1.5rem;">📋</span>
+        Your Tickets
+      </h2>
+      
+      <% if (tickets && tickets.length > 0) { %>
+        <div style="display: grid; gap: 1rem;">
+          <% tickets.forEach(ticket => { %>
+            <div style="background: var(--bg); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border);">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                <h4 style="margin: 0; color: var(--primary);"><%= ticket.subject %></h4>
+                <span style="background: <%= ticket.status === 'resolved' ? 'var(--success)' : 'var(--warning)' %>; color: white; padding: 0.25rem 0.5rem; border-radius: var(--radius); font-size: 0.75rem; font-weight: 600;">
+                  <%= ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1) %>
+                </span>
+              </div>
+              
+              <p style="margin: 0 0 0.5rem 0; color: var(--muted); font-size: 0.875rem;">
+                <%= ticket.description.length > 100 ? ticket.description.substring(0, 100) + '...' : ticket.description %>
+              </p>
+              
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--muted);">
+                <span>Created: <%= new Date(ticket.createdAt).toLocaleDateString() %></span>
+                <% if (ticket.adminRepliedAt) { %>
+                  <span>Replied: <%= new Date(ticket.adminRepliedAt).toLocaleDateString() %></span>
+                <% } %>
+              </div>
+              
+              <% if (ticket.adminReply) { %>
+                <div style="margin-top: 0.75rem; padding: 0.75rem; background: #f0f9ff; border-left: 3px solid var(--primary); border-radius: 0 4px 4px 0;">
+                  <p style="margin: 0; font-size: 0.875rem; color: var(--text);">
+                    <strong>Admin Response:</strong> <%= ticket.adminReply %>
+                  </p>
+                </div>
+              <% } %>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div style="text-align: center; padding: 2rem; color: var(--muted);">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
+          <h4 style="margin: 0 0 0.5rem 0;">No Tickets Yet</h4>
+          <p style="margin: 0;">You haven't created any support tickets yet.</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>

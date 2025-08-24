@@ -39,10 +39,14 @@
           <span style="color:var(--primary);font-weight:600;">Organizer</span>
         <% } %>
         <a href="/auth/logout" style="color:#dc2626;">Logout</a>
-      <% } else { %>
-        <a href="/auth/login">Login</a>
-        <a href="/auth/register" class="btn" style="padding:0.5rem 1rem;font-size:0.875rem;">Register</a>
-      <% } %>
+             <% } else { %>
+         <a href="/auth/login">Login</a>
+         <a href="/auth/register" class="btn" style="padding:0.5rem 1rem;font-size:0.875rem;">Register</a>
+       <% } %>
+       
+       <% if (user && user.role !== 'admin') { %>
+         <a href="/support">Help</a>
+       <% } %>
     </div>
   </div>
 </nav>

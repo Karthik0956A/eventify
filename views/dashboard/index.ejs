@@ -1,4 +1,3 @@
-<div class="container">
   <div class="hero">
     <h1>Welcome, <%= user ? user.name : 'User' %>!</h1>
     <p>Manage your events, registrations, and analytics here.</p>
@@ -95,9 +94,23 @@
           <span style="font-size:1.5rem;">👥</span>
           All Users
         </h2>
-        <div style="display:grid;gap:0.5rem;">
+        
+        <!-- Search Bar -->
+        <div style="margin-bottom:1rem;">
+          <input 
+            type="text" 
+            id="userSearchInput" 
+            placeholder="Search users by name or email..." 
+            style="width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:0.5rem;"
+          >
+        </div>
+        
+        <div id="usersList" style="display:grid;gap:0.5rem;">
           <% allUsers.forEach(u =>  { if(u.email !== 'admin@eventify.com'){ %>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border);">
+            <div class="user-item" 
+                 data-name="<%= u.name.toLowerCase() %>"
+                 data-email="<%= u.email.toLowerCase() %>"
+                 style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border);">
               <div>
                 <strong style="color:var(--primary);"><%= u.name %></strong>
                 <span style="color:var(--muted);font-size:0.875rem;"> (<%= u.email %>)</span>
@@ -107,6 +120,23 @@
             </div>
           <% }}) %>
         </div>
+        
+        <!-- Load More Button -->
+        <div style="text-align:center;margin-top:1rem;">
+          <button id="loadMoreUsers" class="btn btn-accent" onclick="loadMoreUsers()" style="display:none;">
+            Load More Users
+          </button>
+        </div>
+      </div>
+      
+      <!-- Queries Section -->
+      <div class="card">
+        <h2 style="margin-bottom:1.5rem;color:var(--primary);display:flex;align-items:center;gap:0.5rem;">
+          <span style="font-size:1.5rem;">📋</span>
+          Support Queries
+        </h2>
+        <p style="color:var(--muted);margin-bottom:1rem;">Manage user support tickets and provide assistance.</p>
+        <a href="/support/admin/queries" class="btn btn-accent">View All Queries</a>
       </div>
       
       <div class="card">
@@ -220,5 +250,35 @@ if (ctx) {
       }
     }
   });
+}
+
+// User search functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const userSearchInput = document.getElementById('userSearchInput');
+  const userItems = document.querySelectorAll('.user-item');
+  
+  if (userSearchInput) {
+    userSearchInput.addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase();
+      
+      userItems.forEach(item => {
+        const name = item.dataset.name;
+        const email = item.dataset.email;
+        
+        if (name.includes(searchTerm) || email.includes(searchTerm)) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+  }
+});
+
+// Load more users functionality
+function loadMoreUsers() {
+  // This would be implemented with AJAX to load more users from the server
+  // For now, we'll just show a message
+  alert('Pagination functionality will be implemented with server-side pagination.');
 }
 </script>

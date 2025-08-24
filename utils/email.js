@@ -380,3 +380,22 @@ exports.testEmailConfig = async () => {
     return false;
   }
 };
+
+// Generic email sending function
+exports.sendEmail = async (to, subject, htmlContent) => {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_USER,
+      to: to,
+      subject: subject,
+      html: htmlContent
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email sent:', info.messageId);
+    return info;
+  } catch (error) {
+    console.error('Email sending error:', error);
+    throw error;
+  }
+};

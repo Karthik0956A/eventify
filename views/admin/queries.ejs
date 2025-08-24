@@ -1,0 +1,210 @@
+  <div class="hero">
+    <h1>Support Queries</h1>
+    <p>Manage and respond to user support tickets.</p>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="card" style="margin-bottom: 2rem;">
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <input 
+        type="text" 
+        id="searchInput" 
+        placeholder="Search tickets by subject, user name, or email..." 
+        style="flex: 2; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius);"
+      >
+      <select id="statusFilter" style="flex: 1; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius);">
+        <option value="">All Status</option>
+        <option value="pending">Pending</option>
+        <option value="resolved">Resolved</option>
+      </select>
+      <button class="btn" onclick="clearFilters()">Clear</button>
+    </div>
+  </div>
+
+  <!-- Tickets List -->
+  <div class="card">
+    <h2 style="margin-bottom: 1.5rem; color: var(--primary); display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.5rem;">📋</span>
+      All Support Tickets
+    </h2>
+    
+    <% if (tickets && tickets.length > 0) { %>
+      <div id="ticketsList" style="display: grid; gap: 1rem;">
+                 <% tickets.forEach(ticket => { %>
+           <div class="ticket-item" 
+                data-subject="<%= ticket.subject.toLowerCase() %>"
+                data-user="<%= ticket.user ? ticket.user.name.toLowerCase() : 'unknown' %>"
+                data-email="<%= ticket.user ? ticket.user.email.toLowerCase() : 'unknown' %>"
+                data-status="<%= ticket.status %>"
+                style="background: var(--bg); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--border);">
+             
+             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+               <div style="flex: 1;">
+                 <h3 style="margin: 0 0 0.5rem 0; color: var(--primary);"><%= ticket.subject %></h3>
+                 <p style="margin: 0; color: var(--muted); font-size: 0.875rem;">
+                   <strong>From:</strong> <%= ticket.user ? ticket.user.name : 'Unknown User' %> (<%= ticket.user ? ticket.user.email : 'No email' %>)
+                 </p>
+                <p style="margin: 0.25rem 0 0 0; color: var(--muted); font-size: 0.875rem;">
+                  <strong>Created:</strong> <%= new Date(ticket.createdAt).toLocaleString() %>
+                </p>
+              </div>
+              <div style="text-align: right;">
+                <span style="background: <%= ticket.status === 'resolved' ? 'var(--success)' : 'var(--warning)' %>; color: white; padding: 0.25rem 0.75rem; border-radius: var(--radius); font-size: 0.875rem; font-weight: 600;">
+                  <%= ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1) %>
+                </span>
+              </div>
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+              <h4 style="margin: 0 0 0.5rem 0; color: var(--text);">Description:</h4>
+              <p style="margin: 0; color: var(--muted); line-height: 1.5;"><%= ticket.description %></p>
+            </div>
+            
+            <% if (ticket.adminReply) { %>
+              <div style="margin-bottom: 1rem; padding: 1rem; background: #f0f9ff; border-left: 3px solid var(--primary); border-radius: 0 4px 4px 0;">
+                <h4 style="margin: 0 0 0.5rem 0; color: var(--primary);">Admin Response:</h4>
+                <p style="margin: 0; color: var(--text);"><%= ticket.adminReply %></p>
+                                 <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem; color: var(--muted);">
+                   Replied by: <%= ticket.adminRepliedBy ? ticket.adminRepliedBy.name : 'Admin' %> 
+                   on <%= ticket.adminRepliedAt ? new Date(ticket.adminRepliedAt).toLocaleString() : 'Unknown' %>
+                 </p>
+              </div>
+            <% } %>
+            
+            <div style="display: flex; gap: 0.5rem;">
+              <% if (ticket.status === 'pending') { %>
+                <button class="btn btn-accent" onclick="showReplyForm('<%= ticket._id %>', '<%= ticket.subject %>')">
+                  Reply
+                </button>
+              <% } %>
+              <a href="/support/admin/queries/<%= ticket._id %>" class="btn">
+                View Details
+              </a>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+      
+      <!-- Pagination -->
+      <div id="pagination" style="margin-top: 2rem; text-align: center;">
+        <button id="loadMoreBtn" class="btn btn-accent" onclick="loadMoreTickets()" style="display: none;">
+          Load More Tickets
+        </button>
+      </div>
+      
+    <% } else { %>
+      <div style="text-align: center; padding: 3rem; color: var(--muted);">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">📭</div>
+        <h3 style="margin-bottom: 1rem;">No Support Tickets</h3>
+        <p>There are no support tickets to display.</p>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<!-- Reply Modal -->
+<div id="replyModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: var(--radius); width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto;">
+    <h3 id="modalTitle" style="margin-bottom: 1rem; color: var(--primary);"></h3>
+    
+    <form id="replyForm" method="POST">
+      <div style="margin-bottom: 1.5rem;">
+        <label for="replyMessage" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text);">
+          Your Response *
+        </label>
+        <textarea 
+          id="replyMessage" 
+          name="reply" 
+          required 
+          rows="6"
+          placeholder="Enter your response to the user..."
+          style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius); resize: vertical;"
+        ></textarea>
+      </div>
+      
+      <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+        <button type="button" class="btn" onclick="closeReplyModal()" style="background: var(--muted);">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-accent">
+          Send Reply
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// Search and filter functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('searchInput');
+  const statusFilter = document.getElementById('statusFilter');
+  const ticketItems = document.querySelectorAll('.ticket-item');
+  
+  function filterTickets() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const selectedStatus = statusFilter.value;
+    
+    ticketItems.forEach(item => {
+      const subject = item.dataset.subject;
+      const user = item.dataset.user;
+      const email = item.dataset.email;
+      const status = item.dataset.status;
+      
+      let showItem = true;
+      
+      // Search filter
+      if (searchTerm && !subject.includes(searchTerm) && !user.includes(searchTerm) && !email.includes(searchTerm)) {
+        showItem = false;
+      }
+      
+      // Status filter
+      if (selectedStatus && status !== selectedStatus) {
+        showItem = false;
+      }
+      
+      item.style.display = showItem ? 'block' : 'none';
+    });
+  }
+  
+  searchInput.addEventListener('input', filterTickets);
+  statusFilter.addEventListener('change', filterTickets);
+});
+
+function clearFilters() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('statusFilter').value = '';
+  
+  document.querySelectorAll('.ticket-item').forEach(item => {
+    item.style.display = 'block';
+  });
+}
+
+function showReplyForm(ticketId, subject) {
+  document.getElementById('modalTitle').textContent = `Reply to: ${subject}`;
+  document.getElementById('replyForm').action = `/support/admin/queries/${ticketId}/reply`;
+  document.getElementById('replyModal').style.display = 'block';
+}
+
+function closeReplyModal() {
+  document.getElementById('replyModal').style.display = 'none';
+  document.getElementById('replyForm').reset();
+}
+
+// Close modal when clicking outside
+document.getElementById('replyModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeReplyModal();
+  }
+});
+
+// Pagination functionality
+let currentPage = 1;
+const ticketsPerPage = 10;
+
+function loadMoreTickets() {
+  // This would be implemented with AJAX to load more tickets from the server
+  // For now, we'll just show a message
+  alert('Pagination functionality will be implemented with server-side pagination.');
+}
+</script>

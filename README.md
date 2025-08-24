@@ -1,5 +1,6 @@
 # Eventify - Event Management Platform
 
+<a href="https://eventify-uazq.onrender.com">Deployed Link</a>
 A comprehensive event management platform built with Node.js, Express, MongoDB, and Socket.io. Features include user registration, event creation, payment processing, real-time chat, notifications, and wallet management.
 
 ## 🚀 Features
@@ -244,3 +245,4 @@ For support and questions:
 ---
 
 **Eventify** - Making event management simple and engaging! 🎉
+

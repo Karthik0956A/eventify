@@ -1,7 +1,7 @@
 <a href="https://eventify-uazq.onrender.com">Deployed Link</a><br>
-Admin Credentials
-Email:admin@eventify.com
-Password:admin123
+Admin Credentials<br>
+Email:admin@eventify.com<br>
+Password:admin123<br>
 # Eventify - Event Management Platform
 
 A comprehensive event management platform built with Node.js, Express, MongoDB, and Socket.io. Features include user registration, event creation, payment processing, real-time chat, notifications, and wallet management.
@@ -248,6 +248,7 @@ For support and questions:
 ---
 
 **Eventify** - Making event management simple and engaging! 🎉
+
 
 
 

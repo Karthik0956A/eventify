@@ -10,7 +10,7 @@
   <script src="/js/toast.js"></script>
 </head>
 <body style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;">
-  <div class="container" style="max-width:500px;margin:2rem;">
+  <div class="container" style="width:600px;min-width: 500px;margin:2rem;">
     <div class="card" style="text-align:center;padding:2rem;">
       <div style="margin-bottom:2rem;">
         <h1 style="margin:0;color:var(--primary);font-size:2rem;">🚀</h1>
@@ -35,23 +35,23 @@
         
         <div style="margin-bottom:1rem;">
           <label for="phone" style="display:block;text-align:left;font-weight:600;margin-bottom:0.5rem;">Phone Number</label>
-          <input type="tel" id="phone" name="phone" 
+          <input type="tel" id="phone" name="phone" required
                  style="width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius);box-sizing:border-box;"
-                 placeholder="Enter your phone number (optional)">
+                 placeholder="Enter your phone number">
         </div>
         
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
           <div>
             <label for="age" style="display:block;text-align:left;font-weight:600;margin-bottom:0.5rem;">Age</label>
-            <input type="number" id="age" name="age" min="13" max="120"
+            <input type="number" id="age" name="age" min="13" max="120" required
                    style="width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius);box-sizing:border-box;"
-                   placeholder="Age (optional)">
+                   placeholder="Age">
           </div>
           <div>
             <label for="gender" style="display:block;text-align:left;font-weight:600;margin-bottom:0.5rem;">Gender</label>
-            <select id="gender" name="gender" 
+            <select id="gender" name="gender"  required
                     style="width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius);box-sizing:border-box;">
-              <option value="">Select gender (optional)</option>
+              <option value="">Select gender</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
               <option value="other">Other</option>

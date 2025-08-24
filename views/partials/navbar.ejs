@@ -1,16 +1,16 @@
-<nav class="navbar">
+<nav class="navbar" style="font-size: 1.5rem;padding-top: 0.1rem;height: 11vh;position:sticky;top: 0;z-index: 1000;background-color: white;box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
   <div class="container">
-    <a href="/" class="logo" style="font-weight:700;font-size:1.3rem;letter-spacing:1px;color:var(--primary);">Eventify</a>
+    <a href="/" class="logo" style="font-weight:700;font-size:1.3rem;letter-spacing:1px;color:var(--primary);font-size: 2rem;">🤝Eventify</a>
     <div style="display:flex;align-items:center;gap:1rem;">
       <a href="/events">Home</a>
       <!-- <a href="/events">Events</a> -->
       <% if (user) { %>
-        <a href="/dashboard">Dashboard</a>
+        <a href="/dashboard" style="padding-right: 1rem;">Dashboard</a>
         
         <!-- Notification Bell -->
         <div class="notification-container" style="position:relative;">
           <button id="notificationBell" style="background:none;border:none;cursor:pointer;position:relative;padding:0.5rem;">
-            <span style="font-size:1.2rem;">🔔</span>
+            <span style="font-size:1.2rem;padding-left: 0.7rem;">🔔</span>
             <span id="notificationCount" style="position:absolute;top:0;right:0;background:var(--accent);color:white;border-radius:50%;width:18px;height:18px;font-size:0.75rem;display:flex;align-items:center;justify-content:center;display:none;">0</span>
           </button>
           <div id="notificationDropdown" style="position:absolute;top:100%;right:0;background:white;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 6px rgba(0,0,0,0.1);min-width:300px;max-height:400px;overflow-y:auto;z-index:1000;display:none;">
@@ -20,33 +20,33 @@
             <div id="notificationList" style="padding:0;">
               <!-- Notifications will be loaded here -->
             </div>
-                         <div style="padding:0.5rem;border-top:1px solid #e5e7eb;text-align:center;display:flex;gap:0.5rem;">
+            <div style="padding:0.5rem;border-top:1px solid #e5e7eb;text-align:center;display:flex;gap:0.5rem;">
                <button id="markAllRead" style="background:var(--primary);color:white;border:none;padding:0.5rem 1rem;border-radius:4px;cursor:pointer;font-size:0.875rem;">Mark All Read</button>
                <button id="clearAllNotifications" style="background:var(--accent);color:white;border:none;padding:0.5rem 1rem;border-radius:4px;cursor:pointer;font-size:0.875rem;">Clear All</button>
              </div>
-          </div>
+            </div>
         </div>
         
         <!-- Profile Link -->
-        <a href="/auth/profile" style="display:flex;align-items:center;gap:0.5rem;">
+        <a href="/auth/profile" style="display:flex;align-items:center;gap:0.5rem;padding-left:0.001rem;">
           <span style="font-size:1.1rem;">👤</span>
           <span>Profile</span>
         </a>
         
         <% if (user.role === 'admin') { %>
           <span style="color:var(--accent);font-weight:600;">Admin</span>
-        <% } else if (user.role === 'organizer') { %>
-          <span style="color:var(--primary);font-weight:600;">Organizer</span>
-        <% } %>
+          <% } else if (user.role === 'organizer') { %>
+            <span style="color:var(--primary);font-weight:600;">Organizer</span>
+            <% } %>
+            <% if (user && user.role !== 'admin') { %>
+              <a href="/support">Help</a>
+            <% } %>
         <a href="/auth/logout" style="color:#dc2626;">Logout</a>
              <% } else { %>
          <a href="/auth/login">Login</a>
          <a href="/auth/register" class="btn" style="padding:0.5rem 1rem;font-size:0.875rem;">Register</a>
        <% } %>
        
-       <% if (user && user.role !== 'admin') { %>
-         <a href="/support">Help</a>
-       <% } %>
     </div>
   </div>
 </nav>

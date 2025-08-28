@@ -9,6 +9,7 @@ const path = require('path');
 const http = require('http');
 const socketio = require('socket.io');
 const expressLayouts = require('express-ejs-layouts');
+const { GoogleGenerativeAI } =require("@google/generative-ai");
 
 const app = express();
 const server = http.createServer(app);
@@ -65,6 +66,7 @@ const qrRoutes = require('./routes/qrRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const supportRoutes = require('./routes/supportRoutes');
 const { startReminders } = require('./jobs/reminderJob');
+const airoute = require('./routes/airoutes');
 
 // Socket.io chat logic
 io.on('connection', (socket) => {
@@ -88,6 +90,8 @@ connectDB().then(() => {
   app.use('/qr', qrRoutes);
   app.use('/notifications', notificationRoutes);
   app.use('/support', supportRoutes);
+
+  app.use('/ask-ai', airoute);
 
   // 404 handler
   app.use((req, res) => {

@@ -1,5 +1,5 @@
 const express = require("express");
-// const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 const Event = require("../models/Event.js");
 const Payment = require("../models/Payment.js");
 const Notification = require("../models/Notification.js");
@@ -169,6 +169,33 @@ Now respond to the user's query:
             details: err.message,
         });
     }
+});
+
+router.post("/improve", async (req, res) => {
+    try
+    {
+    const { text } = req.body;
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+    // ✅ Call Gemini
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const prompt = `Improve the following description for a event Iam hosting make the text more engaging and give only the improvised text and input without telling pharases like 'here is your output, how can i assist you next blah blah! only improve the grammer and add more words': ${text}`;
+    const result = await model.generateContent(prompt);
+    const response =  result.response;    
+    // console.log(response.text());
+    
+    res.json({ response: response.text() });
+    }
+
+    catch(err){
+        console.error("AI Request Error:", err);
+        res.status(500).json({
+            error: "Failed to process AI request",
+            details: err.message,
+        });    }
+
+    
+
 });
 
 

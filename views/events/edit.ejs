@@ -3,7 +3,8 @@
     <h2 style="text-align:center;margin-bottom:1.5rem;">Edit Event</h2>
     <form action="/events/<%= event ? event._id : '' %>?_method=PUT" method="POST" enctype="multipart/form-data">
       <input type="text" name="title" placeholder="Event Title" value="<%= event ? event.title : '' %>" required>
-      <textarea name="description" placeholder="Description" rows="4" required><%= event ? event.description : '' %></textarea>
+      <textarea name="description" placeholder="Description" rows="4" required id="textarea"><%= event ? event.description : '' %></textarea>
+      <button type="button" class="btn" style="margin-bottom: 1rem;" id="improvise-btn">Improvise</button>
       <input type="text" name="location" placeholder="Location" value="<%= event ? event.location : '' %>" required>
       <input type="date" name="date" value="<%= event ? event.date : '' %>" required>
       <input type="time" name="time" value="<%= event ? event.time : '' %>" required>
@@ -24,3 +25,44 @@
     </form>
   </div>
 </div>
+
+<script>
+  let isloading = false;
+  document.getElementById('improvise-btn').addEventListener('click', async () => {
+    if (isloading) return;
+    isloading = true;
+    if(isloading){
+      document.getElementById('improvise-btn').innerText = 'Generating...';
+      document.getElementById('improvise-btn').disabled = true;
+    }
+
+    const descriptionField = document.getElementById('textarea');
+    const description = descriptionField.value.trim();
+    if (!description) {
+      alert('Please enter a basic description to improvise.');
+      return;
+    }
+    try {
+      const response = await fetch('/ask-ai/improve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: description })
+      });
+      const data = await response.json();
+      // console.log('Backend response:', data); // Debug line
+      if (data.error) {
+        alert('Error: ' + data.error);
+      } else {
+        descriptionField.value = data.response;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred while improvising the description.');
+    }
+    finally {
+      isloading = false;
+      document.getElementById('improvise-btn').innerText = 'Improvise';
+      document.getElementById('improvise-btn').disabled = false;
+    }
+  });
+</script>

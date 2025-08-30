@@ -3,7 +3,9 @@
     <h2 style="text-align:center;margin-bottom:1.5rem;">Create New Event</h2>
     <form action="/events" method="POST" enctype="multipart/form-data">
       <input type="text" name="title" placeholder="Event Title" required>
-      <textarea name="description" placeholder="Description" rows="4" required></textarea>
+      <textarea name="description" placeholder="Description" rows="4" id="textarea" required>
+      </textarea>
+      <button type="button" class="btn" style="margin-bottom: 1rem;" id="improvise-btn">Improvise</button>
       <input type="text" name="location" placeholder="Location" required>
       <input type="date" name="date" required>
       <input type="time" name="time" required>
@@ -24,3 +26,31 @@
     </form>
   </div>
 </div>
+
+<script>
+  document.getElementById('improvise-btn').addEventListener('click', async () => {
+    const descriptionField = document.getElementById('textarea');
+    const description = descriptionField.value.trim();
+    if (!description) {
+      alert('Please enter a basic description to improvise.');
+      return;
+    }
+    try {
+      const response = await fetch('/ask-ai/improve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: description })
+      });
+      const data = await response.json();
+      // console.log('Backend response:', data); // Debug line
+      if (data.error) {
+        alert('Error: ' + data.error);
+      } else {
+        descriptionField.value = data.response;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred while improvising the description.');
+    }
+  });
+</script>

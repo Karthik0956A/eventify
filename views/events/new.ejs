@@ -28,7 +28,15 @@
 </div>
 
 <script>
+  let isloading = false;
   document.getElementById('improvise-btn').addEventListener('click', async () => {
+    if (isloading) return;
+    isloading = true;
+    if(isloading){
+      document.getElementById('improvise-btn').innerText = 'Generating...';
+      document.getElementById('improvise-btn').disabled = true;
+    }
+
     const descriptionField = document.getElementById('textarea');
     const description = descriptionField.value.trim();
     if (!description) {
@@ -51,6 +59,11 @@
     } catch (error) {
       console.error('Error:', error);
       alert('An error occurred while improvising the description.');
+    }
+    finally {
+      isloading = false;
+      document.getElementById('improvise-btn').innerText = 'Improvise';
+      document.getElementById('improvise-btn').disabled = false;
     }
   });
 </script>

@@ -63,6 +63,10 @@ A comprehensive event management platform built with Node.js, Express, MongoDB, 
    ```env
    # Database
    MONGO_URI=mongodb://localhost:27017/eventify
+
+   #API
+   GITHUB_TOKEN=from_github_marketplaces or your_openai_token
+   GEMINI_API_KEY=your_api_key
    
    # Session
    SESSION_SECRET=your-session-secret-here
@@ -248,6 +252,7 @@ For support and questions:
 ---
 
 **Eventify** - Making event management simple and engaging! 🎉
+
 
 
 
